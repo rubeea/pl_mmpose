@@ -70,7 +70,8 @@ class MultilabelClassificationHead(nn.Module):
 
         losses = dict()
         assert not isinstance(self.loss, nn.Sequential)
-        assert target.dim() == 2 and target_weight.dim() == 2
+        assert target.dim() == 2 and \
+               (target_weight.dim() == 2 or target_weight.dim() == 1)
         losses['classification_loss'] = self.loss(output, target,
                                                   target_weight)
         return losses
