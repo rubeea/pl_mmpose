@@ -44,10 +44,10 @@ def _get_max_preds_3d(heatmaps):
 
 
 @HEADS.register_module()
-class HeatMap3DHead(TopDownSimpleHead):
+class Heatmap3DHead(TopDownSimpleHead):
     """3D heatmap head of paper ref: Gyeongsik Moon. "InterHand2.6M: A Dataset
     and Baseline for 3D Interacting Hand Pose Estimation from a Single RGB
-    Image" HeatMap3DHead is a variant of TopDownSimpleHead, and is composed of
+    Image" Heatmap3DHead is a variant of TopDownSimpleHead, and is composed of
     (>=0) number of deconv layers and a simple conv2d layer.
 
     Args:

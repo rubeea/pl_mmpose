@@ -2,10 +2,11 @@ import torch.nn as nn
 
 from .. import builder
 from ..registry import POSENETS
+from .base import BasePose
 
 
 @POSENETS.register_module()
-class MultiTask(nn.Module):
+class MultiTask(BasePose):
     """Multi-task detectors.
 
     Args:
