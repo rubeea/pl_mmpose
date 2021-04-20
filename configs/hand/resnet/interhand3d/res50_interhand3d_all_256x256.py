@@ -46,7 +46,8 @@ model = dict(
             num_deconv_layers=3,
             num_deconv_filters=(256, 256, 256),
             num_deconv_kernels=(4, 4, 4),
-            loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
+            loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True),
+            loss_key='right_hand_heatmap_loss'),
         dict(
             type='Heatmap3DHead',
             in_channels=2048,
@@ -55,7 +56,8 @@ model = dict(
             num_deconv_layers=3,
             num_deconv_filters=(256, 256, 256),
             num_deconv_kernels=(4, 4, 4),
-            loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
+            loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True),
+            loss_key='left_hand_heatmap_loss'),
         dict(
             type='Heatmap1DHead',
             in_channels=2048,

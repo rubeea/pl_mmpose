@@ -73,6 +73,7 @@ class Heatmap3DHead(TopDownSimpleHead):
         align_corners (bool): align_corners argument of F.interpolate.
             Default: False.
         loss_keypoint (dict): Config for keypoint loss. Default: None.
+        loss_key (str): The key of keypoint loss. Default: None
     """
 
     def __init__(self,
@@ -87,6 +88,7 @@ class Heatmap3DHead(TopDownSimpleHead):
                  input_transform=None,
                  align_corners=False,
                  loss_keypoint=None,
+                 loss_key='heatmap_loss',
                  train_cfg=None,
                  test_cfg=None):
 
@@ -96,6 +98,7 @@ class Heatmap3DHead(TopDownSimpleHead):
                          loss_keypoint, train_cfg, test_cfg)
         assert out_channels % depth_size == 0
         self.depth_size = depth_size
+        self.loss_key = loss_key
 
     def get_loss(self, output, target, target_weight):
         """Calculate 3D heatmap loss.
@@ -116,7 +119,7 @@ class Heatmap3DHead(TopDownSimpleHead):
         losses = dict()
         assert not isinstance(self.loss, nn.Sequential)
         assert target.dim() == 5 and target_weight.dim() == 3
-        losses['heatmap_loss'] = self.loss(output, target, target_weight)
+        losses[self.loss_key] = self.loss(output, target, target_weight)
         return losses
 
     # The accuracy of interhand keypoints is not well defined.
