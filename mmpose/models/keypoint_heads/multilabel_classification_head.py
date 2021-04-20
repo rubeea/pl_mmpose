@@ -92,7 +92,10 @@ class MultilabelClassificationHead(nn.Module):
 
         accuracy = dict()
         # only calculate accuracy on the samples with ground truth labels
-        valid = (target_weight > 0).min(dim=1)[0]
+        if target_weight.dim() == 2:
+            valid = (target_weight > 0).min(dim=1)[0]
+        else:
+            valid = target_weight > 0
 
         output, target = output[valid], target[valid]
 
