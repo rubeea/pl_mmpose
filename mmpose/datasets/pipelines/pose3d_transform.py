@@ -308,11 +308,13 @@ class Generate3DHeatmapTarget:
         sigma: Sigma of heatmap gaussian.
         joint_indices (list): Indices of joints used for heatmap generation.
         If None (default) is given, all joints will be used.
+        max_bound (float): The maximal value of heatmap.
     """
 
-    def __init__(self, sigma=2, joint_indices=None):
+    def __init__(self, sigma=2, joint_indices=None, max_bound=1.0):
         self.sigma = sigma
         self.joint_indices = joint_indices
+        self.max_bound = max_bound
 
     def __call__(self, results):
         """Generate the target heatmap."""
@@ -376,7 +378,7 @@ class Generate3DHeatmapTarget:
             [1, tmp_size, tmp_size, tmp_size])
         idx = np.stack([idx_joints, zz, yy, xx], axis=-1).astype(np.long)
         np.put(target, idx.reshape(-1, 4), local_target.reshape(-1))
-
+        target = target * self.max_bound
         results['target'] = target
         results['target_weight'] = target_weight
         return results

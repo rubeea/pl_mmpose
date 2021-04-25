@@ -9,14 +9,12 @@ def test_interhand_3d_head():
     input_shape = (1, 2048, 8, 8)
     inputs = torch.rand(input_shape, dtype=torch.float32)
     target = [
-        inputs.new_zeros(1, 21, 64, 64, 64),
-        inputs.new_zeros(1, 21, 64, 64, 64),
+        inputs.new_zeros(1, 42, 64, 64, 64),
         inputs.new_zeros(1, 1),
         inputs.new_zeros(1, 2),
     ]
     target_weight = [
-        inputs.new_ones(1, 21, 1),
-        inputs.new_ones(1, 21, 1),
+        inputs.new_ones(1, 42, 1),
         inputs.new_ones(1, 1),
         inputs.new_ones(1),
     ]
@@ -61,16 +59,14 @@ def test_interhand_3d_head():
     # test forward
     output = head(inputs)
     assert isinstance(output, list)
-    assert len(output) == 4
-    assert output[0].shape == (1, 21, 64, 64, 64)
-    assert output[1].shape == (1, 21, 64, 64, 64)
-    assert output[2].shape == (1, 1)
-    assert output[3].shape == (1, 2)
+    assert len(output) == 3
+    assert output[0].shape == (1, 42, 64, 64, 64)
+    assert output[1].shape == (1, 1)
+    assert output[2].shape == (1, 2)
 
     # test loss computation
     losses = head.get_loss(output, target, target_weight)
-    assert 'right_hand_loss' in losses
-    assert 'left_hand_loss' in losses
+    assert 'hand_loss' in losses
     assert 'rel_root_loss' in losses
     assert 'hand_type_loss' in losses
 
@@ -78,11 +74,10 @@ def test_interhand_3d_head():
     flip_pairs = [[i, 21 + i] for i in range(21)]
     output = head.inference_model(inputs, flip_pairs)
     assert isinstance(output, list)
-    assert len(output) == 4
-    assert output[0].shape == (1, 21, 64, 64, 64)
-    assert output[1].shape == (1, 21, 64, 64, 64)
-    assert output[2].shape == (1, 1)
-    assert output[3].shape == (1, 2)
+    assert len(output) == 3
+    assert output[0].shape == (1, 42, 64, 64, 64)
+    assert output[1].shape == (1, 1)
+    assert output[2].shape == (1, 2)
 
     # test decode
     result = head.decode(img_metas, output)

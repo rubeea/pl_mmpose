@@ -73,14 +73,12 @@ def _demo_mm_inputs(input_shape=(1, 3, 256, 256), num_outputs=None):
     imgs = torch.FloatTensor(imgs)
 
     target = [
-        imgs.new_zeros(N, 21, 64, H // 4, W // 4),
-        imgs.new_zeros(N, 21, 64, H // 4, W // 4),
+        imgs.new_zeros(N, 42, 64, H // 4, W // 4),
         imgs.new_zeros(N, 1),
         imgs.new_zeros(N, 2),
     ]
     target_weight = [
-        imgs.new_ones(N, 21, 1),
-        imgs.new_ones(N, 21, 1),
+        imgs.new_ones(N, 42, 1),
         imgs.new_ones(N, 1),
         imgs.new_ones(N),
     ]
