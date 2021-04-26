@@ -376,8 +376,10 @@ class Generate3DHeatmapTarget:
         idx_joints = np.tile(
             np.arange(num_joints)[:, None, None, None],
             [1, tmp_size, tmp_size, tmp_size])
-        idx = np.stack([idx_joints, zz, yy, xx], axis=-1).astype(np.long)
-        np.put(target, idx.reshape(-1, 4), local_target.reshape(-1))
+        idx = np.stack([idx_joints, zz, yy, xx],
+                       axis=-1).astype(np.long).reshape(-1, 4)
+        target[idx[:, 0], idx[:, 1], idx[:, 2],
+               idx[:, 3]] = local_target.reshape(-1)
         target = target * self.max_bound
         results['target'] = target
         results['target_weight'] = target_weight
