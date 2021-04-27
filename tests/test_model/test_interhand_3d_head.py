@@ -6,17 +6,18 @@ from mmpose.models import Interhand3DHead
 
 def test_interhand_3d_head():
     """Test interhand 3d head."""
-    input_shape = (1, 2048, 8, 8)
+    N = 4
+    input_shape = (N, 2048, 8, 8)
     inputs = torch.rand(input_shape, dtype=torch.float32)
     target = [
-        inputs.new_zeros(1, 42, 64, 64, 64),
-        inputs.new_zeros(1, 1),
-        inputs.new_zeros(1, 2),
+        inputs.new_zeros(N, 42, 64, 64, 64),
+        inputs.new_zeros(N, 1),
+        inputs.new_zeros(N, 2),
     ]
     target_weight = [
-        inputs.new_ones(1, 42, 1),
-        inputs.new_ones(1, 1),
-        inputs.new_ones(1),
+        inputs.new_ones(N, 42, 1),
+        inputs.new_ones(N, 1),
+        inputs.new_ones(N),
     ]
 
     img_metas = [{
@@ -30,7 +31,7 @@ def test_interhand_3d_head():
         'image_file': '<demo>.png',
         'heatmap3d_depth_bound': 400.0,
         'root_depth_bound': 400.0,
-    }]
+    } for _ in range(N)]
 
     head = Interhand3DHead(
         keypoint_head_cfg=dict(
@@ -60,9 +61,9 @@ def test_interhand_3d_head():
     output = head(inputs)
     assert isinstance(output, list)
     assert len(output) == 3
-    assert output[0].shape == (1, 42, 64, 64, 64)
-    assert output[1].shape == (1, 1)
-    assert output[2].shape == (1, 2)
+    assert output[0].shape == (N, 42, 64, 64, 64)
+    assert output[1].shape == (N, 1)
+    assert output[2].shape == (N, 2)
 
     # test loss computation
     losses = head.get_loss(output, target, target_weight)
@@ -75,9 +76,9 @@ def test_interhand_3d_head():
     output = head.inference_model(inputs, flip_pairs)
     assert isinstance(output, list)
     assert len(output) == 3
-    assert output[0].shape == (1, 42, 64, 64, 64)
-    assert output[1].shape == (1, 1)
-    assert output[2].shape == (1, 2)
+    assert output[0].shape == (N, 42, 64, 64, 64)
+    assert output[1].shape == (N, 1)
+    assert output[2].shape == (N, 2)
 
     # test decode
     result = head.decode(img_metas, output)
