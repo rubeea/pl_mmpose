@@ -24,38 +24,9 @@ class AnimalFlyDataset(AnimalBaseDataset):
 
     Vinegar Fly keypoint indexes::
 
-        0: "head",
-        1: "eyeL",
-        2: "eyeR",
-        3: "neck",
-        4: "thorax",
-        5: "abdomen",
-        6: "forelegR1",
-        7: "forelegR2",
-        8: "forelegR3",
-        9: "forelegR4",
-        10: "midlegR1",
-        11: "midlegR2",
-        12: "midlegR3",
-        13: "midlegR4",
-        14: "hindlegR1",
-        15: "hindlegR2",
-        16: "hindlegR3",
-        17: "hindlegR4",
-        18: "forelegL1",
-        19: "forelegL2",
-        20: "forelegL3",
-        21: "forelegL4",
-        22: "midlegL1",
-        23: "midlegL2",
-        24: "midlegL3",
-        25: "midlegL4",
-        26: "hindlegL1",
-        27: "hindlegL2",
-        28: "hindlegL3",
-        29: "hindlegL4",
-        30: "wingL",
-        31: "wingR"
+        0: "start",
+        1: "center",
+        2: "end"
 
     Args:
         ann_file (str): Path to the annotation file.
@@ -78,14 +49,14 @@ class AnimalFlyDataset(AnimalBaseDataset):
             ann_file, img_prefix, data_cfg, pipeline, test_mode=test_mode)
 
         self.ann_info['use_different_joint_weights'] = False
-        assert self.ann_info['num_joints'] == 32
+        assert self.ann_info['num_joints'] == 3
         self.ann_info['joint_weights'] = \
             np.ones((self.ann_info['num_joints'], 1), dtype=np.float32)
 
-        self.ann_info['flip_pairs'] = [[1, 2], [6, 18], [7, 19], [8, 20],
-                                       [9, 21], [10, 22], [11, 23], [12, 24],
-                                       [13, 25], [14, 26], [15, 27], [16, 28],
-                                       [17, 29], [30, 31]]
+        # self.ann_info['flip_pairs'] = [[1, 2], [6, 18], [7, 19], [8, 20],
+        #                                [9, 21], [10, 22], [11, 23], [12, 24],
+        #                                [13, 25], [14, 26], [15, 27], [16, 28],
+        #                                [17, 29], [30, 31]]
 
         self.dataset_name = 'fly'
         self.db = self._get_db()
