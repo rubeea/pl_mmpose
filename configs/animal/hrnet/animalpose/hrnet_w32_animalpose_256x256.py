@@ -23,17 +23,17 @@ log_config = dict(
     interval=1,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 
 channel_cfg = dict(
-    num_output_channels=20,
-    dataset_joints=20,
+    num_output_channels=3,
+    dataset_joints=3,
     dataset_channel=[
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        [0, 1, 2],
     ],
     inference_channel=[
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+        0, 1, 2
     ])
 
 # model settings
@@ -72,7 +72,7 @@ model = dict(
     ),
     keypoint_head=dict(
         type='TopDownSimpleHead',
-        in_channels=32,
+        in_channels=3,
         out_channels=channel_cfg['num_output_channels'],
         num_deconv_layers=0,
         extra=dict(final_conv_kernel=1, ),
@@ -144,27 +144,27 @@ val_pipeline = [
 
 test_pipeline = val_pipeline
 
-data_root = 'data/animalpose'
+data_root = '/content/pl_mmpose/data/DeepPoseKit-Data/datasets/fly'
 data = dict(
-    samples_per_gpu=64,
+    samples_per_gpu=2,
     workers_per_gpu=2,
-    val_dataloader=dict(samples_per_gpu=32),
-    test_dataloader=dict(samples_per_gpu=32),
+    val_dataloader=dict(samples_per_gpu=2),
+    test_dataloader=dict(samples_per_gpu=2),
     train=dict(
-        type='AnimalPoseDataset',
-        ann_file=f'{data_root}/annotations/animalpose_train.json',
+        type='AnimalFlyDataset',
+        ann_file=f'{data_root}/annotations/fly_train.json',
         img_prefix=f'{data_root}/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
-        type='AnimalPoseDataset',
-        ann_file=f'{data_root}/annotations/animalpose_val.json',
+        type='AnimalFlyDataset',
+        ann_file=f'{data_root}/annotations/fly_test.json',
         img_prefix=f'{data_root}/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='AnimalPoseDataset',
-        ann_file=f'{data_root}/annotations/animalpose_val.json',
+        type='AnimalFlyDataset',
+        ann_file=f'{data_root}/annotations/fly_test.json',
         img_prefix=f'{data_root}/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
