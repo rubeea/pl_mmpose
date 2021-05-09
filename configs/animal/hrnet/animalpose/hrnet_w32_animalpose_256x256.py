@@ -72,7 +72,7 @@ model = dict(
     ),
     keypoint_head=dict(
         type='TopDownSimpleHead',
-        in_channels=3,
+        in_channels=32,
         out_channels=channel_cfg['num_output_channels'],
         num_deconv_layers=0,
         extra=dict(final_conv_kernel=1, ),
@@ -153,19 +153,19 @@ data = dict(
     train=dict(
         type='AnimalFlyDataset',
         ann_file=f'{data_root}/annotations/fly_train.json',
-        img_prefix=f'{data_root}/',
+        img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
         type='AnimalFlyDataset',
         ann_file=f'{data_root}/annotations/fly_test.json',
-        img_prefix=f'{data_root}/',
+        img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
         type='AnimalFlyDataset',
         ann_file=f'{data_root}/annotations/fly_test.json',
-        img_prefix=f'{data_root}/',
+        img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
 )
