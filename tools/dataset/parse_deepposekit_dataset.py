@@ -113,12 +113,7 @@ for dataset in ['fly', 'locust', 'zebra']:
     keypoints_info = []
     if dataset == 'fly':
         keypoints_info = [
-            'head', 'eyeL', 'eyeR', 'neck', 'thorax', 'abdomen', 'forelegR1',
-            'forelegR2', 'forelegR3', 'forelegR4', 'midlegR1', 'midlegR2',
-            'midlegR3', 'midlegR4', 'hindlegR1', 'hindlegR2', 'hindlegR3',
-            'hindlegR4', 'forelegL1', 'forelegL2', 'forelegL3', 'forelegL4',
-            'midlegL1', 'midlegL2', 'midlegL3', 'midlegL4', 'hindlegL1',
-            'hindlegL2', 'hindlegL3', 'hindlegL4', 'wingL', 'wingR'
+            'start', 'center', 'end'
         ]
     elif dataset == 'locust':
         keypoints_info = [
