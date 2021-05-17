@@ -4,7 +4,7 @@ resume_from = None
 dist_params = dict(backend='nccl')
 workflow = [('train', 1)]
 checkpoint_config = dict(interval=10)
-evaluation = dict(interval=10, metric='mAP', key_indicator='AP')
+evaluation = dict(interval=10, metric='AUC', key_indicator='AUC')
 
 optimizer = dict(
     type='Adam',
@@ -39,8 +39,8 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    pretrained='https://download.openmmlab.com/mmpose/'
-    'pretrain_models/hrnet_w32-36af842e.pth',
+#     pretrained='https://download.openmmlab.com/mmpose/'
+#     'pretrain_models/hrnet_w32-36af842e.pth',
     backbone=dict(
         type='HRNet',
         in_channels=3,
