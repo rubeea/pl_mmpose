@@ -109,12 +109,18 @@ def save_coco_anno(keypoints_all,
     print(f'done {save_path}')
 
 
-for dataset in ['fly', 'locust', 'zebra']:
+for dataset in ['fly', 'locust', 'zebra', 'mendeley']:
     keypoints_info = []
     if dataset == 'fly':
         keypoints_info = [
             'start', 'center', 'end'
         ]
+        
+    elif dataset == 'mendeley':
+        keypoints_info = [
+            'start', 'end'
+        ]
+        
     elif dataset == 'locust':
         keypoints_info = [
             'head', 'neck', 'thorax', 'abdomen1', 'abdomen2', 'anttipL',
