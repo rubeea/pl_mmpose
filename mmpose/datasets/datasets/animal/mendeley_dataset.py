@@ -22,7 +22,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
     The dataset loads raw features and apply specified transforms
     to return a dict containing the image tensors and other information.
 
-    Vinegar Fly keypoint indexes::
+    MendeleyPL keypoint indexes::
 
         0: "start",
         1: "end"
@@ -57,7 +57,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
         #                                [13, 25], [14, 26], [15, 27], [16, 28],
         #                                [17, 29], [30, 31]]
 
-        self.dataset_name = 'fly'
+        self.dataset_name = 'mendeley'
         self.db = self._get_db()
 
         print(f'=> num_images: {self.num_images}')
