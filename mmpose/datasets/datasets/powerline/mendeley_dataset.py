@@ -1,36 +1,30 @@
 import os
 from collections import OrderedDict
 
-import json_tricks as json
 import numpy as np
 
-from mmpose.core.evaluation.top_down_eval import (keypoint_auc, keypoint_epe,
-                                                  keypoint_pck_accuracy)
-from ...registry import DATASETS
-from .animal_base_dataset import AnimalBaseDataset
+from mmpose.datasets.builder import DATASETS
+from powerline_base_dataset import PowerlineBaseDataset
 
 
 @DATASETS.register_module()
-class MendeleyPLDataset(AnimalBaseDataset):
-    """MendeleyPLDataset for PL keypoint estimation.
-
-    `Fast animal pose estimation using deep neural networks'
-    Nature methods'2019. More details can be found in the `paper
-    <https://www.biorxiv.org/content/
-      biorxiv/early/2018/05/25/331181.full.pdf>`__ .
+class MendeleyPLDataset(PowerlineBaseDataset):
+    """MendeleyPLDataset for Mendeley Powerline Detection.
 
     The dataset loads raw features and apply specified transforms
     to return a dict containing the image tensors and other information.
 
-    MendeleyPL keypoint indexes::
+    Powerline indexes for keypoints::
 
-        0: "start",
-        1: "end"
+        0: 'start',
+        1: 'end'
 
     Args:
         ann_file (str): Path to the annotation file.
         img_prefix (str): Path to a directory where images are held.
             Default: None.
+        subset (str): The FLD dataset has 3 subsets, 'upper', 'lower',
+            and 'full', denoting different types of clothes.
         data_cfg (dict): config
         pipeline (list[dict | callable]): A sequence of data transforms.
         test_mode (bool): Store True when building test or
@@ -51,11 +45,6 @@ class MendeleyPLDataset(AnimalBaseDataset):
         assert self.ann_info['num_joints'] == 2
         self.ann_info['joint_weights'] = \
             np.ones((self.ann_info['num_joints'], 1), dtype=np.float32)
-
-        # self.ann_info['flip_pairs'] = [[1, 2], [6, 18], [7, 19], [8, 20],
-        #                                [9, 21], [10, 22], [11, 23], [12, 24],
-        #                                [13, 25], [14, 26], [15, 27], [16, 28],
-        #                                [17, 29], [30, 31]]
 
         self.dataset_name = 'mendeley'
         self.db = self._get_db()
@@ -83,12 +72,11 @@ class MendeleyPLDataset(AnimalBaseDataset):
                 joints_3d[:, :2] = keypoints[:, :2]
                 joints_3d_visible[:, :2] = np.minimum(1, keypoints[:, 2:3])
 
-                # the ori image is 512x512
-                center, scale = self._xywh2cs(0, 0, 512, 512, 0.8)
+                # use 1.25bbox as input
+                center, scale = self._xywh2cs(*obj['bbox'][:4], 1.25)
 
                 image_file = os.path.join(self.img_prefix,
                                           self.id2name[img_id])
-
                 gt_db.append({
                     'image_file': image_file,
                     'center': center,
@@ -106,62 +94,9 @@ class MendeleyPLDataset(AnimalBaseDataset):
 
         return gt_db
 
-    def _report_metric(self, res_file, metrics, pck_thr=0.2, auc_nor=30):
-        """Keypoint evaluation.
-
-        Args:
-            res_file (str): Json file stored prediction results.
-            metrics (str | list[str]): Metric to be performed.
-                Options: 'PCK', 'PCKh', 'AUC', 'EPE'.
-            pck_thr (float): PCK threshold, default as 0.2.
-            pckh_thr (float): PCKh threshold, default as 0.7.
-            auc_nor (float): AUC normalization factor, default as 30 pixel.
-
-        Returns:
-            List: Evaluation results for evaluation metric.
-        """
-        info_str = []
-
-        with open(res_file, 'r') as fin:
-            preds = json.load(fin)
-        assert len(preds) == len(self.db)
-
-        outputs = []
-        gts = []
-        masks = []
-        threshold_bbox = []
-
-        for pred, item in zip(preds, self.db):
-            outputs.append(np.array(pred['keypoints'])[:, :-1])
-            gts.append(np.array(item['joints_3d'])[:, :-1])
-            masks.append((np.array(item['joints_3d_visible'])[:, 0]) > 0)
-            if 'PCK' in metrics:
-                bbox = np.array(item['bbox'])
-                bbox_thr = np.max(bbox[2:])
-                threshold_bbox.append(np.array([bbox_thr, bbox_thr]))
-
-        outputs = np.array(outputs)
-        gts = np.array(gts)
-        masks = np.array(masks)
-        threshold_bbox = np.array(threshold_bbox)
-
-        if 'PCK' in metrics:
-            _, pck, _ = keypoint_pck_accuracy(outputs, gts, masks, pck_thr,
-                                              threshold_bbox)
-            info_str.append(('PCK', pck))
-
-        if 'AUC' in metrics:
-            info_str.append(('AUC', keypoint_auc(outputs, gts, masks,
-                                                 auc_nor)))
-
-        if 'EPE' in metrics:
-            info_str.append(('EPE', keypoint_epe(outputs, gts, masks)))
-
-        return info_str
-
     def evaluate(self, outputs, res_folder, metric='PCK', **kwargs):
-        """Evaluate Fly keypoint results. The pose prediction results will be
-        saved in `${res_folder}/result_keypoints.json`.
+        """Evaluate freihand keypoint results. The pose prediction results will
+        be saved in `${res_folder}/result_keypoints.json`.
 
         Note:
             batch_size: N
@@ -175,7 +110,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
                     coordinates, score is the third dimension of the array.
                 :boxes (np.ndarray[N,6]): [center[0], center[1], scale[0]
                     , scale[1],area, score]
-                :image_paths (list[str]): For example, ['Test/source/0.jpg']
+                :image_paths (list[str]): For example, [ 'img_00000001.jpg']
                 :output_heatmap (np.ndarray[N, K, H, W]): model outpus.
 
             res_folder (str): Path of directory to save the results.
