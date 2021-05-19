@@ -725,10 +725,12 @@ def vis_pose_result(model,
         pose_kpt_color = palette[[0] * 20]
 
     elif dataset in 'MendeyPLDataset':
-    	skeleton = [[0, 0], [1, 0]]
+        skeleton = [[0, 0], [1, 0]]
 
         pose_limb_color = palette[[0] * 2]
         pose_kpt_color = palette[[0] * 2]
+        radius = 3
+        kpt_score_thr = 0
 
     else:
         raise NotImplementedError()
