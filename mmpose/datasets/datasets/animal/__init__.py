@@ -5,7 +5,7 @@ from .animal_locust_dataset import AnimalLocustDataset
 from .animal_macaque_dataset import AnimalMacaqueDataset
 from .animal_pose_dataset import AnimalPoseDataset
 from .animal_zebra_dataset import AnimalZebraDataset
-from .mendeley_pl_dataset import MendeleyPLDataset
+from .mendeley_dataset import MendeleyPLDataset
 
 __all__ = [
     'AnimalHorse10Dataset', 'AnimalMacaqueDataset', 'AnimalFlyDataset',
