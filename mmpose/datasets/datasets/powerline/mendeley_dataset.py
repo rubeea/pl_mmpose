@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 
 from mmpose.datasets.builder import DATASETS
-from powerline_base_dataset import PowerlineBaseDataset
+from .powerline_base_dataset import PowerlineBaseDataset
 
 
 @DATASETS.register_module()
