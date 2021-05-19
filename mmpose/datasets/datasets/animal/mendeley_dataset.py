@@ -12,11 +12,21 @@ from .animal_base_dataset import AnimalBaseDataset
 
 @DATASETS.register_module()
 class MendeleyPLDataset(AnimalBaseDataset):
-   
-    Power Line keypoint indexes::
+    """MendeleyPLDataset for PL keypoint estimation.
+
+    `Fast animal pose estimation using deep neural networks'
+    Nature methods'2019. More details can be found in the `paper
+    <https://www.biorxiv.org/content/
+      biorxiv/early/2018/05/25/331181.full.pdf>`__ .
+
+    The dataset loads raw features and apply specified transforms
+    to return a dict containing the image tensors and other information.
+
+    Vinegar Fly keypoint indexes::
+
         0: "start",
         1: "end"
-        
+
     Args:
         ann_file (str): Path to the annotation file.
         img_prefix (str): Path to a directory where images are held.
@@ -47,7 +57,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
         #                                [13, 25], [14, 26], [15, 27], [16, 28],
         #                                [17, 29], [30, 31]]
 
-        self.dataset_name = 'mendeley'
+        self.dataset_name = 'fly'
         self.db = self._get_db()
 
         print(f'=> num_images: {self.num_images}')
@@ -98,6 +108,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
 
     def _report_metric(self, res_file, metrics, pck_thr=0.2, auc_nor=30):
         """Keypoint evaluation.
+
         Args:
             res_file (str): Json file stored prediction results.
             metrics (str | list[str]): Metric to be performed.
@@ -105,6 +116,7 @@ class MendeleyPLDataset(AnimalBaseDataset):
             pck_thr (float): PCK threshold, default as 0.2.
             pckh_thr (float): PCKh threshold, default as 0.7.
             auc_nor (float): AUC normalization factor, default as 30 pixel.
+
         Returns:
             List: Evaluation results for evaluation metric.
         """
@@ -150,11 +162,13 @@ class MendeleyPLDataset(AnimalBaseDataset):
     def evaluate(self, outputs, res_folder, metric='PCK', **kwargs):
         """Evaluate Fly keypoint results. The pose prediction results will be
         saved in `${res_folder}/result_keypoints.json`.
+
         Note:
             batch_size: N
             num_keypoints: K
             heatmap height: H
             heatmap width: W
+
         Args:
             outputs (list(preds, boxes, image_path, output_heatmap))
                 :preds (np.ndarray[N,K,3]): The first two dimensions are
@@ -163,9 +177,11 @@ class MendeleyPLDataset(AnimalBaseDataset):
                     , scale[1],area, score]
                 :image_paths (list[str]): For example, ['Test/source/0.jpg']
                 :output_heatmap (np.ndarray[N, K, H, W]): model outpus.
+
             res_folder (str): Path of directory to save the results.
             metric (str | list[str]): Metric to be performed.
                 Options: 'PCK', 'AUC', 'EPE'.
+
         Returns:
             dict: Evaluation results for evaluation metric.
         """
