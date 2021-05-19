@@ -260,6 +260,10 @@ def _inference_single_pose_model(model,
     elif dataset in 'AnimalPoseDataset':
         flip_pairs = [[0, 1], [2, 3], [8, 9], [10, 11], [12, 13], [14, 15],
                       [16, 17], [18, 19]]
+
+    elif dataset in 'MendeyPLDataset':
+    	flip_pairs = []
+
     else:
         raise NotImplementedError()
 
@@ -719,6 +723,12 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[0] * 20]
         pose_kpt_color = palette[[0] * 20]
+
+    elif dataset in 'MendeyPLDataset':
+    	skeleton = [[0, 0], [1, 0]]
+
+        pose_limb_color = palette[[0] * 2]
+        pose_kpt_color = palette[[0] * 2]
 
     else:
         raise NotImplementedError()
