@@ -62,9 +62,9 @@ def save_coco_anno(data_annotation,
                     keypoints[ind, 1] = p['position'][1]
                     keypoints[ind, 2] = 2
 
-            segmentation = np.array(seg[0]['segment'])
-            max_x, max_y = segmentation.max(0)
-            min_x, min_y = segmentation.min(0)
+            # segmentation = np.array(seg[0]['segment'])
+            # max_x, max_y = segmentation.max(0)
+            # min_x, min_y = segmentation.min(0)
 
             anno = {}
             anno['keypoints'] = keypoints.reshape(-1).tolist()
@@ -78,10 +78,11 @@ def save_coco_anno(data_annotation,
                 float(max_y - min_y + 1)
             ]
             anno['iscrowd'] = 0
-            anno['area'] = float(
-                PolyArea(segmentation[:, 0], segmentation[:, 1]))
+            # anno['area'] = float(
+            #     PolyArea(segmentation[:, 0], segmentation[:, 1]))
+            anno['area'] = anno['bbox'][2] * anno['bbox'][3]
             anno['category_id'] = 1
-            anno['segmentation'] = segmentation.reshape([1, -1]).tolist()
+            # anno['segmentation'] = segmentation.reshape([1, -1]).tolist()
 
             annotations.append(anno)
             ann_id += 1
