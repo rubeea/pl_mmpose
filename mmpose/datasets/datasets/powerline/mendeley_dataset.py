@@ -42,11 +42,11 @@ class MendeleyPLDataset(PowerlineBaseDataset):
             ann_file, img_prefix, data_cfg, pipeline, test_mode=test_mode)
 
         self.ann_info['use_different_joint_weights'] = False
-        assert self.ann_info['num_joints'] == 2
+        assert self.ann_info['num_joints'] == 3
         self.ann_info['joint_weights'] = \
             np.ones((self.ann_info['num_joints'], 1), dtype=np.float32)
 
-        self.dataset_name = 'mendeley'
+        self.dataset_name = 'mendeleypl'
         self.db = self._get_db()
 
         print(f'=> num_images: {self.num_images}')
