@@ -725,10 +725,10 @@ def vis_pose_result(model,
         pose_kpt_color = palette[[0] * 20]
 
     elif dataset in 'MendeleyPLDataset':
-        skeleton = [[0, 0], [1, 0]]
+        skeleton = [[0, 0], [1, 2], [2, 0]]
 
-        pose_limb_color = palette[[0] * 2]
-        pose_kpt_color = palette[[0] * 2]
+        pose_limb_color = palette[[0] * 3]
+        pose_kpt_color = palette[[0] * 3]
         radius = 5
 
     else:
