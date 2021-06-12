@@ -41,6 +41,9 @@ class MendeleyBottomUpDataset(PowerlineBottomUpBaseDataset):
                  pipeline,
                  test_mode=False):
         super().__init__(ann_file, img_prefix, data_cfg, pipeline, test_mode)
+         self.ann_info['flip_index'] = [
+            0, 2, 1
+        ]
 
         self.ann_info['use_different_joint_weights'] = False
         assert self.ann_info['num_joints'] == 3

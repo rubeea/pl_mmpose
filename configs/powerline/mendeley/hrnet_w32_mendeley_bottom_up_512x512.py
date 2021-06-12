@@ -35,10 +35,10 @@ channel_cfg = dict(
         0, 1, 2 ])
 
 data_cfg = dict(
-    image_size=512,
-    base_size=256,
+    image_size=256,
+    base_size=128,
     base_sigma=2,
-    heatmap_size=[128],
+    heatmap_size=[64],
     num_joints=channel_cfg['dataset_joints'],
     dataset_channel=channel_cfg['dataset_channel'],
     inference_channel=channel_cfg['inference_channel'],
@@ -169,7 +169,7 @@ test_pipeline = val_pipeline
 
 data_root = '/content/pl_mmpose/data/mendeleypl'
 data = dict(
-    samples_per_gpu=24,
+    samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
         type='MendeleyBottomUpDataset',

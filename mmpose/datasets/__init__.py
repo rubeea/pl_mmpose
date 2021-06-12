@@ -14,7 +14,7 @@ from .datasets import (  # isort:skip
     TopDownCrowdPoseDataset, TopDownFreiHandDataset, TopDownJhmdbDataset,
     TopDownMhpDataset, TopDownMpiiDataset, TopDownMpiiTrbDataset,
     TopDownOCHumanDataset, TopDownOneHand10KDataset, TopDownPanopticDataset,
-    TopDownPoseTrack18Dataset, MendeleyPLDataset)
+    TopDownPoseTrack18Dataset, MendeleyPLDataset, MendeleyBottomUpDataset)
 
 __all__ = [
     'AnimalATRWDataset', 'TopDownCocoDataset', 'BottomUpCocoDataset',
@@ -28,7 +28,7 @@ __all__ = [
     'TopDownPanopticDataset', 'TopDownPoseTrack18Dataset',
     'TopDownJhmdbDataset', 'TopDownMhpDataset', 'Face300WDataset',
     'AnimalHorse10Dataset', 'AnimalMacaqueDataset', 'AnimalFlyDataset',
-    'AnimalLocustDataset', 'AnimalZebraDataset', 'AnimalPoseDataset', 'MendeleyPLDataset',
+    'AnimalLocustDataset', 'AnimalZebraDataset', 'AnimalPoseDataset', 'MendeleyPLDataset', 'MendeleyBottomUpDataset',
     'build_dataloader', 'build_dataset', 'Compose', 'DistributedSampler',
     'DATASETS', 'PIPELINES'
 ]
