@@ -19,7 +19,7 @@ from .top_down import (TopDownAicDataset, TopDownCocoDataset,
                        TopDownMpiiDataset, TopDownMpiiTrbDataset,
                        TopDownOCHumanDataset, TopDownPoseTrack18Dataset)
 
-from .powerline import MendeleyPLDataset
+from .powerline import (MendeleyPLDataset, MendeleyBottomUpDataset)
 
 __all__ = [
     'TopDownCocoDataset', 'BottomUpCocoDataset', 'BottomUpMhpDataset',
@@ -35,5 +35,5 @@ __all__ = [
     'Face300WDataset', 'FaceAFLWDataset', 'FaceWFLWDataset', 'FaceCOFWDataset',
     'Body3DH36MDataset', 'AnimalHorse10Dataset', 'AnimalMacaqueDataset',
     'AnimalFlyDataset', 'AnimalLocustDataset', 'AnimalZebraDataset',
-    'AnimalATRWDataset', 'AnimalPoseDataset', 'MendeleyPLDataset'
+    'AnimalATRWDataset', 'AnimalPoseDataset', 'MendeleyPLDataset', 'MendeleyBottomUpDataset'
 ]

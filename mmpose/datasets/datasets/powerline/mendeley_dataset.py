@@ -55,12 +55,6 @@ class MendeleyPLDataset(PowerlineBaseDataset):
         self.oks_thr = data_cfg['oks_thr']
         self.vis_thr = data_cfg['vis_thr']
 
-        # self.ann_info['flip_pairs'] = [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10],
-                                       # [11, 12], [13, 14], [15, 16]]
-
-        # self.ann_info['upper_body_ids'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-        # self.ann_info['lower_body_ids'] = (11, 12, 13, 14, 15, 16)
-
         self.ann_info['use_different_joint_weights'] = False
         
         assert self.ann_info['num_joints'] == 3
@@ -78,8 +72,7 @@ class MendeleyPLDataset(PowerlineBaseDataset):
         # 'https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/'
         # 'pycocotools/cocoeval.py#L523'
         self.sigmas = np.array([
-            .26, .25, .25, .35, .35, .79, .79, .72, .72, .62, .62, 1.07, 1.07,
-            .87, .87, .89, .89
+            .26, .25, .25
         ]) / 10.0
 
         self.coco = COCO(ann_file)
