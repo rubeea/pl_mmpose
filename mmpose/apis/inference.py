@@ -469,7 +469,7 @@ def inference_bottom_up_pose_model(model,
             'num_joints':
             cfg.data_cfg['num_joints'],
             'flip_index':
-            [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15],
+            [0, 2, 1], #modified for mendeleyPL Bottom up dataset with 3 keypoints
         }
     }
 
@@ -725,6 +725,13 @@ def vis_pose_result(model,
         pose_kpt_color = palette[[0] * 20]
 
     elif dataset in 'MendeleyPLDataset':
+        skeleton = [[0, 0], [1, 2], [2, 0]]
+
+        pose_limb_color = palette[[0] * 3]
+        pose_kpt_color = palette[[0] * 3]
+        radius = 5
+
+    elif dataset in 'MendeleyBottomUpDataset':
         skeleton = [[0, 0], [1, 2], [2, 0]]
 
         pose_limb_color = palette[[0] * 3]
