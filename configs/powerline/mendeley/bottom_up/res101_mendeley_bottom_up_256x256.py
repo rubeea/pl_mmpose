@@ -32,7 +32,7 @@ channel_cfg = dict(
         [0, 1, 2],
     ],
     inference_channel=[
-        0, 1, 2
+        [0, 1, 2
     ])
 
 data_cfg = dict(
@@ -50,8 +50,8 @@ data_cfg = dict(
 # model settings
 model = dict(
     type='BottomUp',
-    # pretrained='torchvision://resnet50',
-    backbone=dict(type='ResNet', depth=50),
+    # pretrained='torchvision://resnet101',
+    backbone=dict(type='ResNet', depth=101),
     keypoint_head=dict(
         type='BottomUpSimpleHead',
         in_channels=2048,
@@ -67,8 +67,7 @@ model = dict(
             push_loss_factor=[0.001],
             pull_loss_factor=[0.001],
             with_heatmaps_loss=[True],
-            heatmaps_loss_factor=[1.0],
-        )),
+            heatmaps_loss_factor=[1.0])),
     train_cfg=dict(
         num_joints=channel_cfg['dataset_joints'],
         img_size=data_cfg['image_size']),

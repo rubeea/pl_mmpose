@@ -23,61 +23,95 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
+        # dict(type='TensorboardLoggerHook')
     ])
 
 channel_cfg = dict(
-    dataset_joints=3,
+    dataset_joints=17,
     dataset_channel=[
-        [0, 1, 2],
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
     ],
     inference_channel=[
-        0, 1, 2
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
     ])
 
 data_cfg = dict(
-    image_size=256,
-    base_size=128,
+    image_size=512,
+    base_size=256,
     base_sigma=2,
-    heatmap_size=[64],
+    heatmap_size=[128, 256],
     num_joints=channel_cfg['dataset_joints'],
     dataset_channel=channel_cfg['dataset_channel'],
     inference_channel=channel_cfg['inference_channel'],
-    num_scales=1,
+    num_scales=2,
     scale_aware_sigma=False,
 )
 
 # model settings
 model = dict(
     type='BottomUp',
-    # pretrained='torchvision://resnet50',
-    backbone=dict(type='ResNet', depth=50),
+    pretrained='https://download.openmmlab.com/mmpose/'
+    'pretrain_models/hrnet_w32-36af842e.pth',
+    backbone=dict(
+        type='HRNet',
+        in_channels=3,
+        extra=dict(
+            stage1=dict(
+                num_modules=1,
+                num_branches=1,
+                block='BOTTLENECK',
+                num_blocks=(4, ),
+                num_channels=(64, )),
+            stage2=dict(
+                num_modules=1,
+                num_branches=2,
+                block='BASIC',
+                num_blocks=(4, 4),
+                num_channels=(32, 64)),
+            stage3=dict(
+                num_modules=4,
+                num_branches=3,
+                block='BASIC',
+                num_blocks=(4, 4, 4),
+                num_channels=(32, 64, 128)),
+            stage4=dict(
+                num_modules=3,
+                num_branches=4,
+                block='BASIC',
+                num_blocks=(4, 4, 4, 4),
+                num_channels=(32, 64, 128, 256))),
+    ),
     keypoint_head=dict(
-        type='BottomUpSimpleHead',
-        in_channels=2048,
-        num_joints=3,
+        type='BottomUpHigherResolutionHead',
+        in_channels=32,
+        num_joints=17,
         tag_per_joint=True,
-        with_ae_loss=[True],
+        extra=dict(final_conv_kernel=1, ),
+        num_deconv_layers=1,
+        num_deconv_filters=[32],
+        num_deconv_kernels=[4],
+        num_basic_blocks=4,
+        cat_output=[True],
+        with_ae_loss=[True, False],
         loss_keypoint=dict(
             type='MultiLossFactory',
-            num_joints=3,
-            num_stages=1,
+            num_joints=17,
+            num_stages=2,
             ae_loss_type='exp',
-            with_ae_loss=[True],
-            push_loss_factor=[0.001],
-            pull_loss_factor=[0.001],
-            with_heatmaps_loss=[True],
-            heatmaps_loss_factor=[1.0],
-        )),
+            with_ae_loss=[True, False],
+            push_loss_factor=[0.001, 0.001],
+            pull_loss_factor=[0.001, 0.001],
+            with_heatmaps_loss=[True, True],
+            heatmaps_loss_factor=[1.0, 1.0])),
     train_cfg=dict(
         num_joints=channel_cfg['dataset_joints'],
         img_size=data_cfg['image_size']),
     test_cfg=dict(
         num_joints=channel_cfg['dataset_joints'],
-        max_num_people=6,
+        max_num_people=30,
         scale_factor=[1],
-        with_heatmaps=[True],
-        with_ae=[True],
+        with_heatmaps=[True, True],
+        with_ae=[True, False],
         project2image=True,
         nms_kernel=5,
         nms_padding=2,
@@ -107,7 +141,7 @@ train_pipeline = [
     dict(
         type='BottomUpGenerateTarget',
         sigma=2,
-        max_num_people=6,
+        max_num_people=30,
     ),
     dict(
         type='Collect',
@@ -138,26 +172,26 @@ val_pipeline = [
 
 test_pipeline = val_pipeline
 
-data_root = '/content/pl_mmpose/data/mendeleypl'
+data_root = 'data/coco'
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=24,
     workers_per_gpu=2,
     train=dict(
-        type='MendeleyBottomUpDataset',
-        ann_file=f'{data_root}/annotations/mendeleypl_train.json',
-        img_prefix=f'{data_root}/images/',
+        type='BottomUpCocoDataset',
+        ann_file=f'{data_root}/annotations/person_keypoints_train2017.json',
+        img_prefix=f'{data_root}/train2017/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
-        type='MendeleyBottomUpDataset',
-        ann_file=f'{data_root}/annotations/mendeleypl_test.json',
-        img_prefix=f'{data_root}/images/',
+        type='BottomUpCocoDataset',
+        ann_file=f'{data_root}/annotations/person_keypoints_val2017.json',
+        img_prefix=f'{data_root}/val2017/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='MendeleyBottomUpDataset',
-        ann_file=f'{data_root}/annotations/mendeleypl_test.json',
-        img_prefix=f'{data_root}/images/',
+        type='BottomUpCocoDataset',
+        ann_file=f'{data_root}/annotations/person_keypoints_val2017.json',
+        img_prefix=f'{data_root}/val2017/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
 )
