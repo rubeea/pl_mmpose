@@ -261,6 +261,7 @@ class MendeleyBottomUpDataset(PowerlineBottomUpBaseDataset):
         self._write_coco_keypoint_results(oks_nmsed_kpts, res_file)
 
         info_str = self._do_python_keypoint_eval(res_file)
+        print(info_str)
         name_value = OrderedDict(info_str)
         return name_value
 
