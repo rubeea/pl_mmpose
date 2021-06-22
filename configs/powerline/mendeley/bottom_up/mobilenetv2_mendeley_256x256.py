@@ -87,7 +87,8 @@ model = dict(
         ignore_too_much=False,
         adjust=True,
         refine=True,
-        flip_test=True))
+        flip_test=True,
+        use_udp=True))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -96,7 +97,8 @@ train_pipeline = [
         rot_factor=30,
         scale_factor=[0.75, 1.5],
         scale_type='short',
-        trans_factor=40),
+        trans_factor=40,
+        use_udp=True),
     dict(type='BottomUpRandomFlip', flip_prob=0.5),
     dict(type='ToTensor'),
     dict(
@@ -107,6 +109,7 @@ train_pipeline = [
         type='BottomUpGenerateTarget',
         sigma=2,
         max_num_people=6,
+        use_udp=True,
     ),
     dict(
         type='Collect',
@@ -116,7 +119,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='BottomUpGetImgSize', test_scale_factor=[1]),
+    dict(type='BottomUpGetImgSize', test_scale_factor=[1], use_udp=True),
     dict(
         type='BottomUpResizeAlign',
         transforms=[
@@ -125,7 +128,8 @@ val_pipeline = [
                 type='NormalizeTensor',
                 mean=[0.485, 0.456, 0.406],
                 std=[0.229, 0.224, 0.225]),
-        ]),
+        ],
+        use_udp=True),
     dict(
         type='Collect',
         keys=['img'],
