@@ -8,7 +8,7 @@ from xtcocotools.coco import COCO
 from xtcocotools.cocoeval import COCOeval
 
 from ....core.post_processing import oks_nms, soft_oks_nms
-from ...registry import DATASETS
+from ...builder import DATASETS
 from .topdown_base_dataset import TopDownBaseDataset
 
 
@@ -226,7 +226,7 @@ class TopDownCocoDataset(TopDownBaseDataset):
         return rec
 
     def _xywh2cs(self, x, y, w, h):
-        """This encodes bbox(x,y,w,w) into (center, scale)
+        """This encodes bbox(x,y,w,h) into (center, scale)
 
         Args:
             x, y, w, h
@@ -381,7 +381,7 @@ class TopDownCocoDataset(TopDownBaseDataset):
 
             if self.use_nms:
                 nms = soft_oks_nms if self.soft_nms else oks_nms
-                keep = nms(list(img_kpts), oks_thr, sigmas=self.sigmas)
+                keep = nms(img_kpts, oks_thr, sigmas=self.sigmas)
                 valid_kpts.append([img_kpts[_keep] for _keep in keep])
             else:
                 valid_kpts.append(img_kpts)

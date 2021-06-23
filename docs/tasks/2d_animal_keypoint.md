@@ -17,21 +17,26 @@ MMPose supported datasets:
 
 <!-- [DATASET] -->
 
+<details>
+<summary align="right">Animal-Pose (ICCV'2019)</summary>
+
 ```bibtex
 @InProceedings{Cao_2019_ICCV,
     author = {Cao, Jinkun and Tang, Hongyang and Fang, Hao-Shu and Shen, Xiaoyong and Lu, Cewu and Tai, Yu-Wing},
     title = {Cross-Domain Adaptation for Animal Pose Estimation},
     booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
     month = {October},
-    year = {2019} }
-
+    year = {2019}
+}
 ```
+
+</details>
 
 For [Animal-Pose](https://sites.google.com/view/animal-pose/) datatset, we prepare the dataset as follows:
 
 1. Download the images of [PASCAL2011](http://www.google.com/url?q=http%3A%2F%2Fhost.robots.ox.ac.uk%2Fpascal%2FVOC%2Fvoc2011%2Findex.html&sa=D&sntz=1&usg=AFQjCNGmiJGkhSSWtShDe7NwRPyyyBUYSQ), especially the five categories (dog, cat, sheep, cow, horse), which we use as trainval dataset.
 1. Download the [test-set](https://drive.google.com/drive/folders/1DwhQobZlGntOXxdm7vQsE4bqbFmN3b9y?usp=sharing) images with raw annotations (1000 images, 5 categories).
-1. We have pre-processed the annotations to make it compatible with MMPose. Please download the annotation files from [annotations](https://download.openmmlab.com/mmpose/datasets/animalpose_annotations.tar). If you would like to generate the annotations by yourself, please check our dataset parsing [codes](tools/dataset/parse_animalpose_dataset.py).
+1. We have pre-processed the annotations to make it compatible with MMPose. Please download the annotation files from [annotations](https://download.openmmlab.com/mmpose/datasets/animalpose_annotations.tar). If you would like to generate the annotations by yourself, please check our dataset parsing [codes](/tools/dataset/parse_animalpose_dataset.py).
 
 Extract them under {MMPose}/data, and make them look like this:
 
@@ -96,6 +101,9 @@ Those images from other sources (1000 images with 1000 annotations) are used for
 
 <!-- [DATASET] -->
 
+<details>
+<summary align="right">Horse-10 (WACV'2021)</summary>
+
 ```bibtex
 @inproceedings{mathis2021pretraining,
   title={Pretraining boosts out-of-domain robustness for pose estimation},
@@ -106,8 +114,10 @@ Those images from other sources (1000 images with 1000 annotations) are used for
 }
 ```
 
+</details>
+
 For [Horse-10](http://www.mackenziemathislab.org/horse10) datatset, images can be downloaded from [download](http://www.mackenziemathislab.org/horse10).
-Please download the annotation files from [horse10_annotations](https://download.openmmlab.com/mmpose/datasets/horse10_annotations.tar).
+Please download the annotation files from [horse10_annotations](https://download.openmmlab.com/mmpose/datasets/horse10_annotations.tar). Note, this data and annotation data is for non-commercial use only, per the authors (see http://horse10.deeplabcut.org for more information).
 Extract them under {MMPose}/data, and make them look like this:
 
 ```text
@@ -137,6 +147,9 @@ mmpose
 
 <!-- [DATASET] -->
 
+<details>
+<summary align="right">MacaquePose (bioRxiv'2020)</summary>
+
 ```bibtex
 @article{labuguen2020macaquepose,
   title={MacaquePose: A novel ‘in the wild’macaque monkey pose dataset for markerless motion capture},
@@ -146,6 +159,8 @@ mmpose
   publisher={Cold Spring Harbor Laboratory}
 }
 ```
+
+</details>
 
 For [MacaquePose](http://www.pri.kyoto-u.ac.jp/datasets/macaquepose/index.html) datatset, images can be downloaded from [download](http://www.pri.kyoto-u.ac.jp/datasets/macaquepose/index.html).
 Please download the annotation files from [macaque_annotations](https://download.openmmlab.com/mmpose/datasets/macaque_annotations.tar).
@@ -173,11 +188,14 @@ mmpose
 
 ```
 
-Since the official dataset does not provide the test set, we randomly select 12500 images for training, and the rest for evaluation (see [code](tools/dataset/parse_macaquepose_dataset.py)).
+Since the official dataset does not provide the test set, we randomly select 12500 images for training, and the rest for evaluation (see [code](/tools/dataset/parse_macaquepose_dataset.py)).
 
 ## Vinegar Fly
 
 <!-- [DATASET] -->
+
+<details>
+<summary align="right">Vinegar Fly (Nature Methods'2019)</summary>
 
 ```bibtex
 @article{pereira2019fast,
@@ -191,6 +209,8 @@ Since the official dataset does not provide the test set, we randomly select 125
   publisher={Nature Publishing Group}
 }
 ```
+
+</details>
 
 For [Vinegar Fly](https://github.com/jgraving/DeepPoseKit-Data) datatset, images can be downloaded from [vinegar_fly_images](https://download.openmmlab.com/mmpose/datasets/vinegar_fly_images.tar).
 Please download the annotation files from [vinegar_fly_annotations](https://download.openmmlab.com/mmpose/datasets/vinegar_fly_annotations.tar).
@@ -217,11 +237,14 @@ mmpose
 
 ```
 
-Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](tools/dataset/parse_deepposekit_dataset.py)).
+Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](/tools/dataset/parse_deepposekit_dataset.py)).
 
 ## Desert Locust
 
 <!-- [DATASET] -->
+
+<details>
+<summary align="right">Desert Locust (Elife'2019)</summary>
 
 ```bibtex
 @article{graving2019deepposekit,
@@ -234,6 +257,8 @@ Since the official dataset does not provide the test set, we randomly select 90\
   publisher={eLife Sciences Publications Limited}
 }
 ```
+
+</details>
 
 For [Desert Locust](https://github.com/jgraving/DeepPoseKit-Data) datatset, images can be downloaded from [locust_images](https://download.openmmlab.com/mmpose/datasets/locust_images.tar).
 Please download the annotation files from [locust_annotations](https://download.openmmlab.com/mmpose/datasets/locust_annotations.tar).
@@ -260,11 +285,14 @@ mmpose
 
 ```
 
-Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](tools/dataset/parse_deepposekit_dataset.py)).
+Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](/tools/dataset/parse_deepposekit_dataset.py)).
 
 ## Grévy’s Zebra
 
 <!-- [DATASET] -->
+
+<details>
+<summary align="right">Desert Locust (Elife'2019)</summary>
 
 ```bibtex
 @article{graving2019deepposekit,
@@ -277,6 +305,8 @@ Since the official dataset does not provide the test set, we randomly select 90\
   publisher={eLife Sciences Publications Limited}
 }
 ```
+
+</details>
 
 For [Grévy’s Zebra](https://github.com/jgraving/DeepPoseKit-Data) datatset, images can be downloaded from [zebra_images](https://download.openmmlab.com/mmpose/datasets/zebra_images.tar).
 Please download the annotation files from [zebra_annotations](https://download.openmmlab.com/mmpose/datasets/zebra_annotations.tar).
@@ -303,11 +333,14 @@ mmpose
 
 ```
 
-Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](tools/dataset/parse_deepposekit_dataset.py)).
+Since the official dataset does not provide the test set, we randomly select 90\% images for training, and the rest (10\%) for evaluation (see [code](/tools/dataset/parse_deepposekit_dataset.py)).
 
 ## ATRW
 
 <!-- [DATASET] -->
+
+<details>
+<summary align="right">ATRW (ACM MM'2020)</summary>
 
 ```bibtex
 @inproceedings{li2020atrw,
@@ -318,6 +351,8 @@ Since the official dataset does not provide the test set, we randomly select 90\
   year={2020}
 }
 ```
+
+</details>
 
 ATRW captures images of the Amur tiger (also known as Siberian tiger, Northeast-China tiger) in the wild.
 For [ATRW](https://cvwc2019.github.io/challenge.html) datatset, please download images from

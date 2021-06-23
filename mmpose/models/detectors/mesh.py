@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 
+from mmpose.models.misc.discriminator import SMPLDiscriminator
 from .. import builder
-from ..mesh_heads.discriminator import SMPLDiscriminator
-from ..registry import POSENETS
+from ..builder import POSENETS
 from .base import BasePose
 
 try:
@@ -316,3 +316,6 @@ class ParametricMesh(BasePose):
         if return_loss:
             return self.forward_train(img, img_metas, **kwargs)
         return self.forward_test(img, img_metas, **kwargs)
+
+    def show_result(self, **kwargs):
+        pass

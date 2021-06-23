@@ -3,7 +3,7 @@ import numpy as np
 
 from mmpose.core.post_processing import (get_affine_transform, get_warp_matrix,
                                          warp_affine_joints)
-from mmpose.datasets.registry import PIPELINES
+from mmpose.datasets.builder import PIPELINES
 from .shared_transform import Compose
 
 
@@ -496,8 +496,9 @@ class BottomUpRandomAffine:
             mat_input = self._get_affine_matrix(center, scale,
                                                 (self.input_size,
                                                  self.input_size), aug_rot)[:2]
-            image = cv2.warpAffine(image, mat_input,
-                                   (int(self.input_size), int(self.input_size)))
+
+            image = cv2.warpAffine(image, mat_input, (self.input_size.item(),
+                                                      self.input_size.item()))
 
         results['img'], results['mask'], results[
             'joints'] = image, mask, joints

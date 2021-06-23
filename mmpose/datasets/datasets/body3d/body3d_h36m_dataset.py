@@ -5,7 +5,7 @@ import mmcv
 import numpy as np
 
 from mmpose.core.evaluation import keypoint_mpjpe
-from ...registry import DATASETS
+from ...builder import DATASETS
 from .body3d_base_dataset import Body3DBaseDataset
 
 
@@ -20,12 +20,12 @@ class Body3DH36MDataset(Body3DBaseDataset):
 
     Human3.6M keypoint indexes::
         0: 'root (pelvis)',
-        1: 'left_hip',
-        2: 'left_knee',
-        3: 'left_foot',
-        4: 'right_hip',
-        5: 'right_knee',
-        6: 'right_foot',
+        1: 'right_hip',
+        2: 'right_knee',
+        3: 'right_foot',
+        4: 'left_hip',
+        5: 'left_knee',
+        6: 'left_foot',
         7: 'spine',
         8: 'thorax',
         9: 'neck_base',
@@ -49,7 +49,7 @@ class Body3DH36MDataset(Body3DBaseDataset):
     """
 
     JOINT_NAMES = [
-        'Root', 'LHip', 'LKnee', 'LFoot', 'RHip', 'RKnee', 'RFoot', 'Spine',
+        'Root', 'RHip', 'RKnee', 'RFoot', 'LHip', 'LKnee', 'LFoot', 'Spine',
         'Thorax', 'NeckBase', 'Head', 'LShoulder', 'LElbow', 'LWrist',
         'RShoulder', 'RElbow', 'RWrist'
     ]
@@ -88,6 +88,16 @@ class Body3DH36MDataset(Body3DBaseDataset):
         ann_info['lower_body_ids'] = (1, 2, 3, 4, 5, 6)
         ann_info['use_different_joint_weights'] = False
 
+        # action filter
+        actions = data_cfg.get('actions', '_all_')
+        self.actions = set(
+            actions if isinstance(actions, (list, tuple)) else [actions])
+
+        # subject filter
+        subjects = data_cfg.get('subjects', '_all_')
+        self.subjects = set(
+            subjects if isinstance(subjects, (list, tuple)) else [subjects])
+
         self.ann_info.update(ann_info)
 
     def load_annotations(self):
@@ -99,6 +109,9 @@ class Body3DH36MDataset(Body3DBaseDataset):
         elif self.joint_2d_src == 'detection':
             data_info['joints_2d'] = self._load_joint_2d_detection(
                 self.joint_2d_det_file)
+            assert data_info['joints_2d'].shape[0] == data_info[
+                'joints_3d'].shape[0]
+            assert data_info['joints_2d'].shape[2] == 3
         elif self.joint_2d_src == 'pipeline':
             # joint_2d will be generated in the pipeline
             pass
@@ -132,6 +145,13 @@ class Body3DH36MDataset(Body3DBaseDataset):
         video_frames = defaultdict(list)
         for idx, imgname in enumerate(self.data_info['imgnames']):
             subj, action, camera = self._parse_h36m_imgname(imgname)
+
+            if '_all_' not in self.actions and action not in self.actions:
+                continue
+
+            if '_all_' not in self.subjects and subj not in self.subjects:
+                continue
+
             video_frames[(subj, action, camera)].append(idx)
 
         # build sample indices
@@ -140,19 +160,44 @@ class Body3DH36MDataset(Body3DBaseDataset):
         _step = self.seq_frame_interval
         for _, _indices in sorted(video_frames.items()):
             n_frame = len(_indices)
-            seqs_from_video = [
-                _indices[i:(i + _len):_step]
-                for i in range(0, n_frame - _len + 1)
-            ]
-            sample_indices.extend(seqs_from_video)
 
-        return sample_indices
+            if self.temporal_padding:
+                # Pad the sequence so that every frame in the sequence will be
+                # predicted.
+                if self.causal:
+                    frames_left = self.seq_len - 1
+                    frames_right = 0
+                else:
+                    frames_left = (self.seq_len - 1) // 2
+                    frames_right = frames_left
+                for i in range(n_frame):
+                    pad_left = max(0, frames_left - i // _step)
+                    pad_right = max(0,
+                                    frames_right - (n_frame - 1 - i) // _step)
+                    start = max(i % _step, i - frames_left * _step)
+                    end = min(n_frame - (n_frame - 1 - i) % _step,
+                              i + frames_right * _step + 1)
+                    sample_indices.append([_indices[0]] * pad_left +
+                                          _indices[start:end:_step] +
+                                          [_indices[-1]] * pad_right)
+            else:
+                seqs_from_video = [
+                    _indices[i:(i + _len):_step]
+                    for i in range(0, n_frame - _len + 1)
+                ]
+                sample_indices.extend(seqs_from_video)
+
+        # reduce dataset size if self.subset < 1
+        assert 0 < self.subset <= 1
+        subset_size = int(len(sample_indices) * self.subset)
+        start = np.random.randint(0, len(sample_indices) - subset_size + 1)
+        end = start + subset_size
+
+        return sample_indices[start:end]
 
     def _load_joint_2d_detection(self, det_file):
         """"Load 2D joint detection results from file."""
         joints_2d = np.load(det_file).astype(np.float32)
-        assert joints_2d.shape[0] == self.data_info['joint_3d'].shape[0]
-        assert joints_2d.shape[2] == 3
 
         return joints_2d
 
@@ -256,9 +301,9 @@ class Body3DH36MDataset(Body3DBaseDataset):
 
         return name_value_tuples
 
-    def _load_camera_param(self, camear_param_file):
+    def _load_camera_param(self, camera_param_file):
         """Load camera parameters from file."""
-        return mmcv.load(camear_param_file)
+        return mmcv.load(camera_param_file)
 
     def get_camera_param(self, imgname):
         """Get camera parameters of a frame by its image name."""
