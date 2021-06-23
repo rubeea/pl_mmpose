@@ -38,5 +38,5 @@ __all__ = [
     'FaceWFLWDataset', 'FaceCOFWDataset', 'Body3DH36MDataset',
     'AnimalHorse10Dataset', 'AnimalMacaqueDataset', 'AnimalFlyDataset',
     'AnimalLocustDataset', 'AnimalZebraDataset', 'AnimalATRWDataset',
-    'AnimalPoseDataset', 'TopDownH36MDataset'
+    'AnimalPoseDataset', 'TopDownH36MDataset', 'MendeleyPLDataset', 'MendeleyBottomUpDataset'
 ]
