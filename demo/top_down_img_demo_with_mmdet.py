@@ -60,6 +60,11 @@ def main():
     parser.add_argument(
         '--device', default='cuda:0', help='Device used for inference')
     parser.add_argument(
+        '--det-cat-id',
+        type=int,
+        default=1,
+        help='Category id for bounding box detection model')
+    parser.add_argument(
         '--bbox-thr',
         type=float,
         default=0.3,
@@ -67,10 +72,15 @@ def main():
     parser.add_argument(
         '--kpt-thr', type=float, default=0.3, help='Keypoint score threshold')
     parser.add_argument(
-        '--det-cat-id',
+        '--radius',
+        type=int,
+        default=4,
+        help='Keypoint radius for visualization')
+    parser.add_argument(
+        '--thickness',
         type=int,
         default=1,
-        help='Category id for bounding box detection model')
+        help='Link thickness for visualization')
 
     assert has_mmdet, 'Please install mmdet to run the demo.'
 
@@ -128,6 +138,8 @@ def main():
         pose_results,
         dataset=dataset,
         kpt_score_thr=args.kpt_thr,
+        radius=args.radius,
+        thickness=args.thickness,
         show=args.show,
         out_file=out_file)
 

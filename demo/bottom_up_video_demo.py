@@ -27,6 +27,21 @@ def main():
         '--device', default='cuda:0', help='Device used for inference')
     parser.add_argument(
         '--kpt-thr', type=float, default=0.3, help='Keypoint score threshold')
+    parser.add_argument(
+        '--pose-nms-thr',
+        type=float,
+        default=0.9,
+        help='OKS threshold for pose NMS')
+    parser.add_argument(
+        '--radius',
+        type=int,
+        default=4,
+        help='Keypoint radius for visualization')
+    parser.add_argument(
+        '--thickness',
+        type=int,
+        default=1,
+        help='Link thickness for visualization')
 
     args = parser.parse_args()
 
@@ -71,6 +86,7 @@ def main():
         pose_results, returned_outputs = inference_bottom_up_pose_model(
             pose_model,
             img,
+            pose_nms_thr=args.pose_nms_thr,
             return_heatmap=return_heatmap,
             outputs=output_layer_names)
 
@@ -79,6 +95,8 @@ def main():
             pose_model,
             img,
             pose_results,
+            radius=args.radius,
+            thickness=args.thickness,
             dataset=dataset,
             kpt_score_thr=args.kpt_thr,
             show=False)

@@ -60,6 +60,11 @@ def main():
     parser.add_argument(
         '--device', default='cuda:0', help='Device used for inference')
     parser.add_argument(
+        '--det-cat-id',
+        type=int,
+        default=1,
+        help='Category id for bounding box detection model')
+    parser.add_argument(
         '--bbox-thr',
         type=float,
         default=0.3,
@@ -67,12 +72,23 @@ def main():
     parser.add_argument(
         '--kpt-thr', type=float, default=0.3, help='Keypoint score threshold')
     parser.add_argument(
-        '--iou-thr', type=float, default=0.3, help='IoU score threshold')
+        '--use-oks-tracking', action='store_true', help='Using OKS tracking')
     parser.add_argument(
-        '--det-cat-id',
+        '--tracking-thr', type=float, default=0.3, help='Tracking threshold')
+    parser.add_argument(
+        '--euro',
+        action='store_true',
+        help='Using One_Euro_Filter for smoothing')
+    parser.add_argument(
+        '--radius',
+        type=int,
+        default=4,
+        help='Keypoint radius for visualization')
+    parser.add_argument(
+        '--thickness',
         type=int,
         default=1,
-        help='Category id for bounding box detection model')
+        help='Link thickness for visualization')
 
     assert has_mmdet, 'Please install mmdet to run the demo.'
 
@@ -91,6 +107,8 @@ def main():
     dataset = pose_model.cfg.data['test']['type']
 
     cap = cv2.VideoCapture(args.video_path)
+    fps = None
+
     assert cap.isOpened(), f'Faild to load video file {args.video_path}'
 
     if args.out_video_root == '':
@@ -142,13 +160,21 @@ def main():
 
         # get track id for each person instance
         pose_results, next_id = get_track_id(
-            pose_results, pose_results_last, next_id, iou_thr=args.iou_thr)
+            pose_results,
+            pose_results_last,
+            next_id,
+            use_oks=args.use_oks_tracking,
+            tracking_thr=args.tracking_thr,
+            use_one_euro=args.euro,
+            fps=fps)
 
         # show the results
         vis_img = vis_pose_tracking_result(
             pose_model,
             img,
             pose_results,
+            radius=args.radius,
+            thickness=args.thickness,
             dataset=dataset,
             kpt_score_thr=args.kpt_thr,
             show=False)

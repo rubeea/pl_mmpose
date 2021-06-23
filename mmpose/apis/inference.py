@@ -7,6 +7,7 @@ import torch
 from mmcv.parallel import collate, scatter
 from mmcv.runner import load_checkpoint
 
+from mmpose.core.post_processing import oks_nms
 from mmpose.datasets.pipelines import Compose
 from mmpose.models import build_posenet
 from mmpose.utils.hooks import OutputHook
@@ -146,8 +147,9 @@ def _inference_single_pose_model(model,
                                  bboxes,
                                  dataset,
                                  return_heatmap=False):
-    """Inference a single bbox.
+    """Inference human bounding boxes.
 
+    num_bboxes: N
     num_keypoints: K
 
     Args:
@@ -161,7 +163,7 @@ def _inference_single_pose_model(model,
             to be returned, default: None
 
     Returns:
-        ndarray[Kx3]: Predicted pose x, y, score.
+        ndarray[NxKx3]: Predicted pose x, y, score.
         heatmap[N, K, H, W]: Model output heatmap.
     """
 
@@ -208,6 +210,8 @@ def _inference_single_pose_model(model,
                       [29, 35], [18, 24], [30, 36], [19, 25], [31,
                                                                37], [20, 26],
                       [32, 38], [21, 27], [33, 39]]
+    elif dataset == 'TopDownH36MDataset':
+        flip_pairs = [[1, 4], [2, 5], [3, 6], [11, 14], [12, 15], [13, 16]]
     elif dataset in ('OneHand10KDataset', 'FreiHandDataset', 'PanopticDataset',
                      'InterHand2DDataset'):
         flip_pairs = []
@@ -292,7 +296,7 @@ def _inference_single_pose_model(model,
             'rotation':
             0,
             'ann_info': {
-                'image_size': cfg.data_cfg['image_size'],
+                'image_size': np.array(cfg.data_cfg['image_size']),
                 'num_joints': cfg.data_cfg['num_joints'],
                 'flip_pairs': flip_pairs
             }
@@ -422,6 +426,7 @@ def inference_top_down_pose_model(model,
 
 def inference_bottom_up_pose_model(model,
                                    img_or_path,
+                                   pose_nms_thr=0.9,
                                    return_heatmap=False,
                                    outputs=None):
     """Inference a single image.
@@ -434,9 +439,10 @@ def inference_bottom_up_pose_model(model,
     Args:
         model (nn.Module): The loaded pose model.
         img_or_path (str| np.ndarray): Image filename or loaded image.
-        return_heatmap (bool) : Flag to return heatmap, default: False
+        pose_nms_thr (float): retain oks overlap < pose_nms_thr, default: 0.9.
+        return_heatmap (bool) : Flag to return heatmap, default: False.
         outputs (list(str) | tuple(str)) : Names of layers whose outputs
-            need to be returned, default: None
+            need to be returned, default: None.
 
     Returns:
         list[ndarray]: The predicted pose info.
@@ -496,10 +502,18 @@ def inference_bottom_up_pose_model(model,
 
         returned_outputs.append(h.layer_outputs)
 
-        for pred in result['preds']:
+        for idx, pred in enumerate(result['preds']):
+            area = (np.max(pred[:, 0]) - np.min(pred[:, 0])) * (
+                np.max(pred[:, 1]) - np.min(pred[:, 1]))
             pose_results.append({
                 'keypoints': pred[:, :3],
+                'score': result['scores'][idx],
+                'area': area,
             })
+
+        # pose nms
+        keep = oks_nms(pose_results, pose_nms_thr, sigmas=None)
+        pose_results = [pose_results[_keep] for _keep in keep]
 
     return pose_results, returned_outputs
 
@@ -507,6 +521,8 @@ def inference_bottom_up_pose_model(model,
 def vis_pose_result(model,
                     img,
                     result,
+                    radius=4,
+                    thickness=1,
                     kpt_score_thr=0.3,
                     dataset='TopDownCocoDataset',
                     show=False,
@@ -518,6 +534,8 @@ def vis_pose_result(model,
         img (str | np.ndarray): Image filename or loaded image.
         result (list[dict]): The results to draw over `img`
                 (bbox_result, pose_result).
+        radius (int): Radius of circles.
+        thickness (int): Thickness of lines.
         kpt_score_thr (float): The threshold to visualize the keypoints.
         skeleton (list[tuple()]): Default None.
         show (bool):  Whether to show the image. Default True.
@@ -533,8 +551,6 @@ def vis_pose_result(model,
                         [255, 51, 51], [153, 255, 153], [102, 255, 102],
                         [51, 255, 51], [0, 255, 0], [0, 0, 255], [255, 0, 0],
                         [255, 255, 255]])
-
-    radius = 4
 
     if dataset in ('TopDownCocoDataset', 'BottomUpCocoDataset',
                    'TopDownOCHumanDataset', 'AnimalMacaqueDataset'):
@@ -577,7 +593,6 @@ def vis_pose_result(model,
         pose_kpt_color = palette[
             [16, 16, 16, 16, 16, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0] +
             [0, 0, 0, 0, 0, 0] + [19] * (68 + 42)]
-        radius = 1
 
     elif dataset == 'TopDownAicDataset':
         skeleton = [[3, 2], [2, 1], [1, 14], [14, 4], [4, 5], [5, 6], [9, 8],
@@ -612,6 +627,18 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[16] * 14 + [19] * 13]
         pose_kpt_color = palette[[16] * 14 + [0] * 26]
+
+    elif dataset == 'TopDownH36MDataset':
+        skeleton = [[1, 2], [2, 3], [3, 4], [1, 5], [5, 6], [6, 7], [1, 8],
+                    [8, 9], [9, 10], [10, 11], [9, 12], [12, 13], [13, 14],
+                    [9, 15], [15, 16], [16, 17]]
+
+        pose_kpt_color = palette[[
+            9, 0, 0, 0, 16, 16, 16, 9, 9, 9, 9, 16, 16, 16, 0, 0, 0
+        ]]
+        pose_limb_color = palette[[
+            0, 0, 0, 16, 16, 16, 9, 9, 9, 9, 16, 16, 16, 0, 0, 0
+        ]]
 
     elif dataset in ('OneHand10KDataset', 'FreiHandDataset',
                      'PanopticDataset'):
@@ -648,7 +675,6 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[]]
         pose_kpt_color = palette[[19] * 68]
-        radius = 3
         kpt_score_thr = 0
 
     elif dataset == 'FaceAFLWDataset':
@@ -657,7 +683,6 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[]]
         pose_kpt_color = palette[[19] * 19]
-        radius = 3
         kpt_score_thr = 0
 
     elif dataset == 'FaceCOFWDataset':
@@ -666,7 +691,6 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[]]
         pose_kpt_color = palette[[19] * 29]
-        radius = 3
         kpt_score_thr = 0
 
     elif dataset == 'FaceWFLWDataset':
@@ -675,7 +699,6 @@ def vis_pose_result(model,
 
         pose_limb_color = palette[[]]
         pose_kpt_color = palette[[19] * 98]
-        radius = 3
         kpt_score_thr = 0
 
     elif dataset == 'AnimalHorse10Dataset':
@@ -746,6 +769,7 @@ def vis_pose_result(model,
         result,
         skeleton,
         radius=radius,
+        thickness=thickness,
         pose_kpt_color=pose_kpt_color,
         pose_limb_color=pose_limb_color,
         kpt_score_thr=kpt_score_thr,
