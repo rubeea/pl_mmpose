@@ -49,11 +49,11 @@ data_cfg = dict(
 
 # model settings
 model = dict(
-    type='BottomUp',
+    type='AssociativeEmbedding',
     # pretrained='https://download.openmmlab.com/mmpose/'
-    # 'pretrain_models/hrnet_w32-36af842e.pth',
+    # 'pretrain_models/hrnet_w48-8ef0771d.pth',
     backbone=dict(
-        # type='HRNet',
+        type='HRNet',
         in_channels=3,
         extra=dict(
             stage1=dict(
@@ -67,28 +67,28 @@ model = dict(
                 num_branches=2,
                 block='BASIC',
                 num_blocks=(4, 4),
-                num_channels=(32, 64)),
+                num_channels=(48, 96)),
             stage3=dict(
                 num_modules=4,
                 num_branches=3,
                 block='BASIC',
                 num_blocks=(4, 4, 4),
-                num_channels=(32, 64, 128)),
+                num_channels=(48, 96, 192)),
             stage4=dict(
                 num_modules=3,
                 num_branches=4,
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
-                num_channels=(32, 64, 128, 256))),
+                num_channels=(48, 96, 192, 384))),
     ),
     keypoint_head=dict(
-        type='BottomUpHigherResolutionHead',
-        in_channels=32,
+        type='AEHigherResolutionHead',
+        in_channels=48,
         num_joints=3,
         tag_per_joint=True,
         extra=dict(final_conv_kernel=1, ),
         num_deconv_layers=1,
-        num_deconv_filters=[32],
+        num_deconv_filters=[48],
         num_deconv_kernels=[4],
         num_basic_blocks=4,
         cat_output=[True],
@@ -199,3 +199,4 @@ data = dict(
         data_cfg=data_cfg,
         pipeline=val_pipeline),
 )
+

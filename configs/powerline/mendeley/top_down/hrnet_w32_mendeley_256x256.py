@@ -8,7 +8,7 @@ evaluation = dict(interval=50, metric='mAP', key_indicator='AP')
 
 optimizer = dict(
     type='Adam',
-    lr=0.0015,
+    lr=5e-4,
 )
 optimizer_config = dict(grad_clip=None)
 # learning policy
@@ -17,8 +17,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[200, 260])
-total_epochs = 300
+    step=[170, 200])
+total_epochs = 210
 log_config = dict(
     interval=50,
     hooks=[
@@ -27,6 +27,7 @@ log_config = dict(
     ])
 
 channel_cfg = dict(
+    num_output_channels=3,
     dataset_joints=3,
     dataset_channel=[
         [0, 1, 2],
@@ -35,23 +36,11 @@ channel_cfg = dict(
         0, 1, 2
     ])
 
-data_cfg = dict(
-    image_size=256,
-    base_size=128,
-    base_sigma=2,
-    heatmap_size=[64],
-    num_joints=channel_cfg['dataset_joints'],
-    dataset_channel=channel_cfg['dataset_channel'],
-    inference_channel=channel_cfg['inference_channel'],
-    num_scales=1,
-    scale_aware_sigma=False,
-)
-
 # model settings
 model = dict(
-    type='AssociativeEmbedding',
+    type='TopDown',
     # pretrained='https://download.openmmlab.com/mmpose/'
-    # 'pretrain_models/hrnet_w48-8ef0771d.pth',
+    # 'pretrain_models/hrnet_w32-36af842e.pth',
     backbone=dict(
         type='HRNet',
         in_channels=3,
@@ -67,106 +56,89 @@ model = dict(
                 num_branches=2,
                 block='BASIC',
                 num_blocks=(4, 4),
-                num_channels=(48, 96)),
+                num_channels=(32, 64)),
             stage3=dict(
                 num_modules=4,
                 num_branches=3,
                 block='BASIC',
                 num_blocks=(4, 4, 4),
-                num_channels=(48, 96, 192)),
+                num_channels=(32, 64, 128)),
             stage4=dict(
                 num_modules=3,
                 num_branches=4,
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
-                num_channels=(48, 96, 192, 384))),
+                num_channels=(32, 64, 128, 256))),
     ),
     keypoint_head=dict(
-        type='AESimpleHead',
-        in_channels=48,
-        num_joints=3,
+        type='TopdownHeatmapSimpleHead',
+        in_channels=32,
+        out_channels=channel_cfg['num_output_channels'],
         num_deconv_layers=0,
-        tag_per_joint=True,
-        with_ae_loss=[True],
         extra=dict(final_conv_kernel=1, ),
-        loss_keypoint=dict(
-            type='MultiLossFactory',
-            num_joints=3,
-            num_stages=1,
-            ae_loss_type='exp',
-            with_ae_loss=[True],
-            push_loss_factor=[0.001],
-            pull_loss_factor=[0.001],
-            with_heatmaps_loss=[True],
-            heatmaps_loss_factor=[1.0])),
-    train_cfg=dict(
-        num_joints=channel_cfg['dataset_joints'],
-        img_size=data_cfg['image_size']),
+        loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
+    train_cfg=dict(),
     test_cfg=dict(
-        num_joints=channel_cfg['dataset_joints'],
-        max_num_people=6,
-        scale_factor=[1],
-        with_heatmaps=[True],
-        with_ae=[True],
-        project2image=False,
-        nms_kernel=5,
-        nms_padding=2,
-        tag_per_joint=True,
-        detection_threshold=0.1,
-        tag_threshold=1,
-        use_detection_val=True,
-        ignore_too_much=False,
-        adjust=True,
-        refine=True,
         flip_test=True,
-        use_udp=True))
+        post_process='default',
+        shift_heatmap=True,
+        modulate_kernel=11))
+
+data_cfg = dict(
+    image_size=[256, 256],
+    heatmap_size=[64, 64],
+    num_output_channels=channel_cfg['num_output_channels'],
+    num_joints=channel_cfg['dataset_joints'],
+    dataset_channel=channel_cfg['dataset_channel'],
+    inference_channel=channel_cfg['inference_channel'],
+    soft_nms=False,
+    nms_thr=1.0,
+    oks_thr=0.9,
+    vis_thr=0.2,
+    use_gt_bbox=False,
+    det_bbox_thr=0.0,
+    bbox_file='',
+)
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='TopDownRandomFlip', flip_prob=0.5),
+    # dict(
+    #     type='TopDownHalfBodyTransform',
+    #     num_joints_half_body=8,
+    #     prob_half_body=0.3),
     dict(
-        type='BottomUpRandomAffine',
-        rot_factor=6,
-        scale_factor=[0.75, 1.5],
-        scale_type='short',
-        trans_factor=40,
-        use_udp=True),
-    dict(type='BottomUpRandomFlip', flip_prob=0.5),
+        type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
+    dict(type='TopDownAffine'),
+    dict(type='ToTensor'),
+    dict(
+        type='NormalizeTensor',
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]),
+    dict(type='TopDownGenerateTarget', sigma=2),
+    dict(
+        type='Collect',
+        keys=['img', 'target', 'target_weight'],
+        meta_keys=[
+            'image_file', 'joints_3d', 'joints_3d_visible', 'center', 'scale',
+            'rotation', 'bbox_score', 'flip_pairs'
+        ]),
+]
+
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='TopDownAffine'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225]),
     dict(
-        type='BottomUpGenerateTarget',
-        sigma=2,
-        max_num_people=30,
-        use_udp=True,
-    ),
-    dict(
-        type='Collect',
-        keys=['img', 'joints', 'targets', 'masks'],
-        meta_keys=[]),
-]
-
-val_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='BottomUpGetImgSize', test_scale_factor=[1], use_udp=True),
-    dict(
-        type='BottomUpResizeAlign',
-        transforms=[
-            dict(type='ToTensor'),
-            dict(
-                type='NormalizeTensor',
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225])
-        ],
-        use_udp=True),
-    dict(
         type='Collect',
         keys=['img'],
         meta_keys=[
-            'image_file', 'aug_data', 'test_scale_factor', 'base_size',
-            'center', 'scale', 'flip_index'
+            'image_file', 'center', 'scale', 'rotation', 'bbox_score',
+            'flip_pairs'
         ]),
 ]
 
@@ -176,20 +148,22 @@ data_root = '/content/pl_mmpose/data/mendeleypl'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
+    val_dataloader=dict(samples_per_gpu=2),
+    test_dataloader=dict(samples_per_gpu=2),
     train=dict(
-        type='MendeleyBottomUpDataset',
+        type='MendeleyPLDataset',
         ann_file=f'{data_root}/annotations/mendeleypl_train.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
-        type='MendeleyBottomUpDataset',
+        type='MendeleyPLDataset',
         ann_file=f'{data_root}/annotations/mendeleypl_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='MendeleyBottomUpDataset',
+        type='MendeleyPLDataset',
         ann_file=f'{data_root}/annotations/mendeleypl_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
