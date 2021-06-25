@@ -95,33 +95,12 @@ class MendeleyPLDataset(PowerlineBaseDataset):
         self.img_ids = self.coco.getImgIds()
         self.num_images = len(self.img_ids)
         self.id2name, self.name2id = self._get_mapping_id_name(self.coco.imgs)
-        self.dataset_name = 'macaque'
+        self.dataset_name = 'mendeleypl'
 
         self.db = self._get_db()
 
         print(f'=> num_images: {self.num_images}')
         print(f'=> load {len(self.db)} samples')
-
-    @staticmethod
-    def _get_mapping_id_name(imgs):
-        """
-        Args:
-            imgs (dict): dict of image info.
-
-        Returns:
-            tuple: Image name & id mapping dicts.
-
-            - id2name (dict): Mapping image id to name.
-            - name2id (dict): Mapping image name to id.
-        """
-        id2name = {}
-        name2id = {}
-        for image_id, image in imgs.items():
-            file_name = image['file_name']
-            id2name[image_id] = file_name
-            name2id[file_name] = image_id
-
-        return id2name, name2id
 
     def _get_db(self):
         """Load dataset."""
@@ -208,82 +187,6 @@ class MendeleyPLDataset(PowerlineBaseDataset):
 
         return rec
 
-    def _xywh2cs(self, x, y, w, h):
-        """This encodes bbox(x,y,w,h) into (center, scale)
-
-        Args:
-            x, y, w, h
-
-        Returns:
-            tuple: A tuple containing center and scale.
-
-            - center (np.ndarray[float32](2,)): center of the bbox (x, y).
-            - scale (np.ndarray[float32](2,)): scale of the bbox w & h.
-        """
-        aspect_ratio = self.ann_info['image_size'][0] / self.ann_info[
-            'image_size'][1]
-        center = np.array([x + w * 0.5, y + h * 0.5], dtype=np.float32)
-
-        if (not self.test_mode) and np.random.rand() < 0.3:
-            center += 0.4 * (np.random.rand(2) - 0.5) * [w, h]
-
-        if w > aspect_ratio * h:
-            h = w * 1.0 / aspect_ratio
-        elif w < aspect_ratio * h:
-            w = h * aspect_ratio
-
-        # pixel std is 200.0
-        scale = np.array([w / 200.0, h / 200.0], dtype=np.float32)
-        # padding to include proper amount of context
-        scale = scale * 1.25
-
-        return center, scale
-
-    def _load_coco_person_detection_results(self):
-        """Load coco person detection results."""
-        num_joints = self.ann_info['num_joints']
-        all_boxes = None
-        with open(self.bbox_file, 'r') as f:
-            all_boxes = json.load(f)
-
-        if not all_boxes:
-            raise ValueError('=> Load %s fail!' % self.bbox_file)
-
-        print(f'=> Total boxes: {len(all_boxes)}')
-
-        kpt_db = []
-        bbox_id = 0
-        for det_res in all_boxes:
-            if det_res['category_id'] != 1:
-                continue
-
-            image_file = os.path.join(self.img_prefix,
-                                      self.id2name[det_res['image_id']])
-            box = det_res['bbox']
-            score = det_res['score']
-
-            if score < self.det_bbox_thr:
-                continue
-
-            center, scale = self._xywh2cs(*box[:4])
-            joints_3d = np.zeros((num_joints, 3), dtype=np.float32)
-            joints_3d_visible = np.ones((num_joints, 3), dtype=np.float32)
-            kpt_db.append({
-                'image_file': image_file,
-                'center': center,
-                'scale': scale,
-                'rotation': 0,
-                'bbox': box[:4],
-                'bbox_score': score,
-                'dataset': self.dataset_name,
-                'joints_3d': joints_3d,
-                'joints_3d_visible': joints_3d_visible,
-                'bbox_id': bbox_id
-            })
-            bbox_id = bbox_id + 1
-        print(f'=> Total boxes after filter '
-              f'low score@{self.det_bbox_thr}: {bbox_id}')
-        return kpt_db
         
     def evaluate(self, outputs, res_folder, metric='mAP', **kwargs):
         """Evaluate coco keypoint results. The pose prediction results will be
