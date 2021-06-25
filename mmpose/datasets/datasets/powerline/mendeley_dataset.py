@@ -104,12 +104,8 @@ class MendeleyPLDataset(PowerlineBaseDataset):
 
     def _get_db(self):
         """Load dataset."""
-        if (not self.test_mode) or self.use_gt_bbox:
-            # use ground truth bbox
-            gt_db = self._load_coco_keypoint_annotations()
-        else:
-            # use bbox from detection
-            gt_db = self._load_coco_person_detection_results()
+        assert self.use_gt_bbox
+        gt_db = self._load_coco_keypoint_annotations()
         return gt_db
 
     def _load_coco_keypoint_annotations(self):
