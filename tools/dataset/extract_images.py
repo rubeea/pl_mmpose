@@ -53,7 +53,7 @@ def main():
         for img_name in sorted(os.listdir(now_dir)):
             img = Image.open(osp.join(now_dir, img_name))
             img = img.save(osp.join(out_dir, 'images',
-                                    osp.splitext(img_name)[0] + '.png'))
+                                    osp.splitext(img_name)[0] + '.jpg'))
 
     # with tempfile.TemporaryDirectory(dir=args.tmp_dir) as tmp_dir:
     #     print('Extracting test images.zip...')
