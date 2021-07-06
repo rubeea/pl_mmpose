@@ -104,7 +104,7 @@ class MendeleyPLDataset(PowerlineBaseDataset):
 
     def _get_db(self):
         """Load dataset."""
-        assert self.use_gt_bbox
+        # assert self.use_gt_bbox
         gt_db = self._load_coco_keypoint_annotations()
         return gt_db
 
