@@ -43,7 +43,7 @@ model = dict(
     # 'pretrain_models/hrnet_w32-36af842e.pth',
     backbone=dict(type='MobileNetV3', arch='small', out_indices=(10, )),
     keypoint_head=dict(
-        type='TopDownSimpleHead',
+        type='TopdownHeatmapSimpleHead',
         in_channels=96,
         out_channels=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
@@ -80,7 +80,8 @@ train_pipeline = [
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
     dict(type='TopDownAffine'),
-    dict(type='TopDownRandomShuffle', tile_num=4),
+    # dict(type='TopDownRandomShuffle', tile_num=4),
+    dict(type='MaskImpose'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
