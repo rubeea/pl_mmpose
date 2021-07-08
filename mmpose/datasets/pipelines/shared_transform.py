@@ -279,7 +279,6 @@ class Albumentation:
         repr_str = self.__class__.__name__ + f'(transforms={self.transforms})'
         return repr_str
 
-
 @PIPELINES.register_module()
 class PhotometricDistortion:
     """Apply photometric distortion to image sequentially, every transformation

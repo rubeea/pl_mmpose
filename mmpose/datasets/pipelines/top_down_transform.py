@@ -1,6 +1,10 @@
 import cv2
+import mmcv
 import numpy as np
-
+import image_slicer
+import random
+import math
+from PIL import Image
 from mmpose.core.post_processing import (affine_transform, fliplr_joints,
                                          get_affine_transform, get_warp_matrix,
                                          warp_affine_joints)
@@ -26,7 +30,9 @@ class TopDownRandomFlip:
 
     def __call__(self, results):
         """Perform data augmentation with random image flip."""
+        
         img = results['img']
+        mask_img = results['mask_img']
         joints_3d = results['joints_3d']
         joints_3d_visible = results['joints_3d_visible']
         center = results['center']
@@ -37,12 +43,15 @@ class TopDownRandomFlip:
         if np.random.rand() <= self.flip_prob:
             flipped = True
             img = img[:, ::-1, :]
+            mask_img = mask_img[:, ::-1, :]
+
             joints_3d, joints_3d_visible = fliplr_joints(
                 joints_3d, joints_3d_visible, img.shape[1],
                 results['ann_info']['flip_pairs'])
             center[0] = img.shape[1] - center[0] - 1
 
         results['img'] = img
+        results['mask_img'] = mask_img
         results['joints_3d'] = joints_3d
         results['joints_3d_visible'] = joints_3d_visible
         results['center'] = center
@@ -188,11 +197,13 @@ class TopDownAffine:
         image_size = results['ann_info']['image_size']
 
         img = results['img']
+        mask_img = results['mask_img']
         joints_3d = results['joints_3d']
         joints_3d_visible = results['joints_3d_visible']
         c = results['center']
         s = results['scale']
         r = results['rotation']
+
 
         if self.use_udp:
             trans = get_warp_matrix(r, c * 2.0, image_size - 1.0, s * 200.0)
@@ -202,23 +213,69 @@ class TopDownAffine:
                 flags=cv2.INTER_LINEAR)
             joints_3d[:, 0:2] = \
                 warp_affine_joints(joints_3d[:, 0:2].copy(), trans)
+            mask_img = cv2.warpAffine(
+                mask_img,
+                trans, (int(image_size[0]), int(image_size[1])),
+                flags=cv2.INTER_LINEAR)
+
         else:
             trans = get_affine_transform(c, s, r, image_size)
             img = cv2.warpAffine(
                 img,
                 trans, (int(image_size[0]), int(image_size[1])),
                 flags=cv2.INTER_LINEAR)
+
+            mask_img = cv2.warpAffine(
+                mask_img,
+                trans, (int(image_size[0]), int(image_size[1])),
+                flags=cv2.INTER_LINEAR)
+
             for i in range(results['ann_info']['num_joints']):
                 if joints_3d_visible[i, 0] > 0.0:
                     joints_3d[i,
                               0:2] = affine_transform(joints_3d[i, 0:2], trans)
 
+        
         results['img'] = img
         results['joints_3d'] = joints_3d
         results['joints_3d_visible'] = joints_3d_visible
-
+        results['mask_img'] = mask_img
+        
+        # print(joints_3d)
         return results
 
+@PIPELINES.register_module()
+class MaskImpose:
+    def __call__(self, results):
+        """Call function to perform photometric distortion on images.
+
+        Args:
+            results (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: Result dict with images distorted.
+        """
+
+        img = results['img']
+        mask_img= results['mask_img']
+
+        #combine original image and the mask image
+        img1 = Image.fromarray(img)
+        img1 = img1.convert('RGBA')
+        # print(img1.size)
+
+        img2 = Image.fromarray(mask_img)
+        img2 = img2.convert('RGBA')
+        # print(img2.size)
+
+        r, g, b, alpha = img2.split()
+        alpha = alpha.point(lambda i: i > 0 and 204)
+
+        img = Image.composite(img2, img1, alpha)
+        img= np.array(img.convert('RGB'))
+        
+        results['img'] = img
+        return results
 
 @PIPELINES.register_module()
 class TopDownGenerateTarget:
@@ -681,4 +738,121 @@ class TopDownRandomTranslation:
             center += self.trans_factor * np.random.uniform(
                 -1, 1, size=2) * scale * 200
         results['center'] = center
+        return results
+
+@PIPELINES.register_module()
+class TopDownRandomShuffle:
+    """Data augmentation with random image tile shuffling.
+
+    Required key: 'Required keys: 'img' and 'joints_3d'. Modifies key: 'img' and 'joints_3d' .
+
+    Args:
+        tile_num (int): Number of tiles to generate
+    """
+
+    def __init__(self, tile_num=4):
+        self.tile_num = tile_num
+        
+
+    def __call__(self, results):
+        """Perform data augmentation with random tile shuffling."""
+        
+        # print(type(results['center'])) #numpy array
+        img = results['img']
+        keypoints=  results['joints_3d']
+        # print(results['image_file'])
+        # print(results['img'].shape)
+        # print(results['bbox'])
+        # x1,y1,w,h= results['bbox']
+
+        # start_row= math.floor(y1/2) 
+        # end_row= math.floor((h + y1 -1)/2) 
+        # start_col= math.floor(x1/2)
+        # end_col= math.floor((w + x1 -1)/2)
+
+        # print(start_row,end_row,start_col,end_col)
+        
+        # if start_row>end_row:
+        #   start_row= math.floor(keypoints[1][1])
+        #   end_row= math.floor(keypoints[0][1])
+
+        # if start_col>end_col:
+        #   start_col= math.floor(keypoints[1][0])
+        #   end_col= math.floor(keypoints[0][0])
+
+        # bbox_img= img[start_row:end_row, start_col:end_col]
+
+
+        tiles, org_tile_num, coords = image_slicer.slice(img, self.tile_num) #returns tiles, tile_nums and tile_coords
+        # keypoints=  results['joints_3d']
+        # print(str(keypoints)+"\n")
+        
+        # assign tile number to keypoints before shuffling
+        for i,keypoint in enumerate(keypoints):
+            x = abs(keypoint[0])
+            y = abs(keypoint[1])
+
+            for j in range(len(tiles)):
+                if (x >= tiles[j].coords[0] and y >= tiles[j].coords[1]):
+                    keypoint[2]= tiles[j].number
+        
+        #original tile to coords mapping
+        org_map= dict(zip(org_tile_num, coords))
+
+        #shuffle tiles
+        random.shuffle(coords)
+
+        #assign new coords after shuffling to the tiles
+        for i in range(len(tiles)):
+            tiles[i].coords= coords[i]
+
+        #new tile to coords mapping after shuffling
+        new_map = dict(zip(org_tile_num, coords))
+        # print(org_map)
+        # print(new_map)
+        # print(str(img_file)+"\n")
+        # print(str(keypoints)+"\n")
+
+        for i,keypoint in enumerate(keypoints):
+            kp_tile_num= int(keypoint[2])
+
+            #locate keypoint tile coords in the original list
+            old_coord= org_map[kp_tile_num]
+            diff_x= keypoint[0] - old_coord[0]
+            diff_y= keypoint[1] - old_coord[1]
+
+            #find keypoint tile coords in the shuffled coords dict
+            new_tile_num= list(new_map.keys())[list(new_map.values()).index(old_coord)]
+            new_kp_tile_coords= org_map[new_tile_num]
+
+            #calculate new keypoint coords and replace in keypoints array
+            keypoint[0]= new_kp_tile_coords[0] + diff_x
+            keypoint[1] = new_kp_tile_coords[1] + diff_y
+            keypoint[2] = 0. #reseting to 0 as in the original array
+
+            
+        #update bbox center and scale
+        # results['center'] = np.array(keypoint[0], keypoint[1])
+        
+        # min_x, min_y, extra = keypoints[0] #'extra' variable is for 2 at the end of each kp
+        # max_x, max_y, extra = keypoints[1] #end kp coords
+        # w= max_x - min_x + 1
+        # h= max_y - min_y + 1
+
+        # scale = np.array([w / 200.0, h / 200.0], dtype=np.float32)
+        # scale = scale * 1.25
+        # results['scale'] = scale
+        # results['center'] = np.array([min_x + w * 0.5, min_y + h * 0.5], dtype=np.float32)
+
+        # print(keypoints)
+        # shuffled_bbox_img = image_slicer.join(tiles) #shuffled image with tiles
+        # img= Image.fromarray(img)
+        # img.paste(shuffled_bbox_img, (start_col, start_row))
+
+        img = image_slicer.join(tiles) #shuffled image with tiles
+        final_image= np.array(img) 
+
+        results['img'] = final_image
+        results['joints_3d'] = keypoints #shuffled keypoints
+
         return results
