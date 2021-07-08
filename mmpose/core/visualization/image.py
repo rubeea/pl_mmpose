@@ -6,6 +6,82 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
+def imshow_bboxes(img,
+                  bboxes,
+                  labels=None,
+                  colors='green',
+                  text_color='white',
+                  thickness=1,
+                  font_scale=0.5,
+                  show=True,
+                  win_name='',
+                  wait_time=0,
+                  out_file=None):
+    """Draw bboxes with labels (optional) on an image. This is a wrapper of
+    mmcv.imshow_bboxes.
+
+    Args:
+        img (str or ndarray): The image to be displayed.
+        bboxes (ndarray): ndarray of shape (k, 4), each row is a bbox in
+            format [x1, y1, x2, y2].
+        labels (str or list[str], optional): labels of each bbox.
+        colors (list[str or tuple or :obj:`Color`]): A list of colors.
+        text_color (str or tuple or :obj:`Color`): Color of texts.
+        thickness (int): Thickness of lines.
+        font_scale (float): Font scales of texts.
+        show (bool): Whether to show the image.
+        win_name (str): The window name.
+        wait_time (int): Value of waitKey param.
+        out_file (str, optional): The filename to write the image.
+
+    Returns:
+        ndarray: The image with bboxes drawn on it.
+    """
+
+    # adapt to mmcv.imshow_bboxes input format
+    bboxes = np.split(bboxes, bboxes.shape[0], axis=0)
+    if not isinstance(colors, list):
+        colors = [colors for _ in range(len(bboxes))]
+    colors = [mmcv.color_val(c) for c in colors]
+    assert len(bboxes) == len(colors)
+
+    img = mmcv.imshow_bboxes(
+        img,
+        bboxes,
+        colors,
+        top_k=-1,
+        thickness=thickness,
+        show=False,
+        out_file=None)
+
+    if labels is not None:
+        if not isinstance(labels, list):
+            labels = [labels for _ in range(len(bboxes))]
+        assert len(labels) == len(bboxes)
+
+        for bbox, label, color in zip(bboxes, labels, colors):
+            bbox_int = bbox[0, :4].astype(np.int32)
+            # roughly estimate the proper font size
+            text_size, text_baseline = cv2.getTextSize(label,
+                                                       cv2.FONT_HERSHEY_DUPLEX,
+                                                       font_scale, thickness)
+            text_x1 = bbox_int[0]
+            text_y1 = max(0, bbox_int[1] - text_size[1] - text_baseline)
+            text_x2 = bbox_int[0] + text_size[0]
+            text_y2 = text_y1 + text_size[1] + text_baseline
+            cv2.rectangle(img, (text_x1, text_y1), (text_x2, text_y2), color,
+                          cv2.FILLED)
+            cv2.putText(img, label, (text_x1, text_y2 - text_baseline),
+                        cv2.FONT_HERSHEY_DUPLEX, font_scale,
+                        mmcv.color_val(text_color), thickness)
+
+    if show:
+        mmcv.imshow(img, win_name, wait_time)
+    if out_file is not None:
+        mmcv.imwrite(img, out_file)
+    return img
+
+
 def imshow_keypoints(img,
                      pose_result,
                      skeleton=None,
@@ -118,6 +194,7 @@ def imshow_keypoints_3d(
     pose_limb_color=None,
     vis_height=400,
     kpt_score_thr=0.3,
+    num_instances=-1,
     *,
     axis_azimuth=70,
     axis_limit=1.7,
@@ -145,6 +222,10 @@ def imshow_keypoints_3d(
                 items.
         kpt_score_thr (float): Minimum score of keypoints to be shown.
             Default: 0.3.
+        num_instances (int): Number of instances to be shown in 3D. If smaller
+            than 0, all the instances in the pose_result will be shown.
+            Otherwise, pad or truncate the pose_result to a length of
+            num_instances.
         axis_azimuth (float): axis azimuth angle for 3D visualizations.
         axis_dist (float): axis distance for 3D visualizations.
         axis_elev (float): axis elevation view angle for 3D visualizations.
@@ -158,7 +239,14 @@ def imshow_keypoints_3d(
     """
 
     show_img = img is not None
-    num_axis = len(pose_result) + 1 if show_img else len(pose_result)
+    if num_instances < 0:
+        num_instances = len(pose_result)
+    else:
+        if len(pose_result) > num_instances:
+            pose_result = pose_result[:num_instances]
+        elif len(pose_result) < num_instances:
+            pose_result += [dict()] * (num_instances - len(pose_result))
+    num_axis = num_instances + 1 if show_img else num_instances
 
     plt.ioff()
     fig = plt.figure(figsize=(vis_height * num_axis * 0.01, vis_height * 0.01))
@@ -176,7 +264,10 @@ def imshow_keypoints_3d(
         ax_img.imshow(img, aspect='equal')
 
     for idx, res in enumerate(pose_result):
-        kpts = res['keypoints_3d']
+        dummy = len(res) == 0
+        kpts = np.zeros((1, 3)) if dummy else res['keypoints_3d']
+        if kpts.shape[1] == 3:
+            kpts = np.concatenate([kpts, np.ones((kpts.shape[0], 1))], axis=1)
         valid = kpts[:, 3] >= kpt_score_thr
 
         ax_idx = idx + 2 if show_img else idx + 1
@@ -199,7 +290,7 @@ def imshow_keypoints_3d(
         ax.set_zticklabels([])
         ax.dist = axis_dist
 
-        if pose_kpt_color is not None:
+        if not dummy and pose_kpt_color is not None:
             pose_kpt_color = np.array(pose_kpt_color)
             assert len(pose_kpt_color) == len(kpts)
             x_3d, y_3d, z_3d = np.split(kpts[:, :3], [1, 2], axis=1)
@@ -213,7 +304,7 @@ def imshow_keypoints_3d(
                 color=_color[valid],
             )
 
-        if skeleton is not None and pose_limb_color is not None:
+        if not dummy and skeleton is not None and pose_limb_color is not None:
             pose_limb_color = np.array(pose_limb_color)
             assert len(pose_limb_color) == len(skeleton)
             for limb, limb_color in zip(skeleton, pose_limb_color):
