@@ -29,14 +29,14 @@ class LoadImageFromFile:
         if img is None:
             raise ValueError('Fail to read {}'.format(image_file))
 
-        mask_img_file= str(results['image_file']).replace(".jpg",".png")
-        mask_img = mmcv.imread(mask_img_file)
+        # mask_img_file= str(results['image_file']).replace(".jpg",".png")
+        # mask_img = mmcv.imread(mask_img_file)
         
-        if mask_img is None:
-            raise ValueError('Fail to read {}'.format(mask_img_file))
+        # if mask_img is None:
+        #     raise ValueError('Fail to read {}'.format(mask_img_file))
         
         
         results['img'] = img
-        results['mask_img'] = mask_img
+        # results['mask_img'] = mask_img
         
         return results

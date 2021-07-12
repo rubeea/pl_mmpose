@@ -81,8 +81,8 @@ train_pipeline = [
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
     dict(type='TopDownAffine',use_udp=True),
-    # dict(type='TopDownRandomShuffle', tile_num=4),
-    dict(type='MaskImpose'),
+    dict(type='TopDownRandomShuffle', tile_num=2),
+    # dict(type='MaskImpose'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
@@ -102,6 +102,7 @@ train_pipeline = [
 val_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='TopDownAffine',use_udp=True),
+    dict(type='TopDownRandomShuffle', tile_num=2),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',

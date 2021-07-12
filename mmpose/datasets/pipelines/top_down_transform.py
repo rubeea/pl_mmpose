@@ -32,7 +32,7 @@ class TopDownRandomFlip:
         """Perform data augmentation with random image flip."""
         
         img = results['img']
-        mask_img = results['mask_img']
+        # mask_img = results['mask_img']
         joints_3d = results['joints_3d']
         joints_3d_visible = results['joints_3d_visible']
         center = results['center']
@@ -43,7 +43,7 @@ class TopDownRandomFlip:
         if np.random.rand() <= self.flip_prob:
             flipped = True
             img = img[:, ::-1, :]
-            mask_img = mask_img[:, ::-1, :]
+            # mask_img = mask_img[:, ::-1, :]
 
             joints_3d, joints_3d_visible = fliplr_joints(
                 joints_3d, joints_3d_visible, img.shape[1],
@@ -51,7 +51,7 @@ class TopDownRandomFlip:
             center[0] = img.shape[1] - center[0] - 1
 
         results['img'] = img
-        results['mask_img'] = mask_img
+        # results['mask_img'] = mask_img
         results['joints_3d'] = joints_3d
         results['joints_3d_visible'] = joints_3d_visible
         results['center'] = center
@@ -197,7 +197,7 @@ class TopDownAffine:
         image_size = results['ann_info']['image_size']
 
         img = results['img']
-        mask_img = results['mask_img']
+        # mask_img = results['mask_img']
         joints_3d = results['joints_3d']
         joints_3d_visible = results['joints_3d_visible']
         c = results['center']
@@ -213,10 +213,10 @@ class TopDownAffine:
                 flags=cv2.INTER_LINEAR)
             joints_3d[:, 0:2] = \
                 warp_affine_joints(joints_3d[:, 0:2].copy(), trans)
-            mask_img = cv2.warpAffine(
-                mask_img,
-                trans, (int(image_size[0]), int(image_size[1])),
-                flags=cv2.INTER_LINEAR)
+            # mask_img = cv2.warpAffine(
+            #     mask_img,
+            #     trans, (int(image_size[0]), int(image_size[1])),
+            #     flags=cv2.INTER_LINEAR)
 
         else:
             trans = get_affine_transform(c, s, r, image_size)
@@ -225,10 +225,10 @@ class TopDownAffine:
                 trans, (int(image_size[0]), int(image_size[1])),
                 flags=cv2.INTER_LINEAR)
 
-            mask_img = cv2.warpAffine(
-                mask_img,
-                trans, (int(image_size[0]), int(image_size[1])),
-                flags=cv2.INTER_LINEAR)
+            # mask_img = cv2.warpAffine(
+            #     mask_img,
+            #     trans, (int(image_size[0]), int(image_size[1])),
+            #     flags=cv2.INTER_LINEAR)
 
             for i in range(results['ann_info']['num_joints']):
                 if joints_3d_visible[i, 0] > 0.0:
@@ -239,7 +239,7 @@ class TopDownAffine:
         results['img'] = img
         results['joints_3d'] = joints_3d
         results['joints_3d_visible'] = joints_3d_visible
-        results['mask_img'] = mask_img
+        # results['mask_img'] = mask_img
         
         # print(joints_3d)
         return results
