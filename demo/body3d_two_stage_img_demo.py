@@ -49,7 +49,7 @@ def main():
         'pose_lifter_checkpoint',
         help='Checkpoint file for the 2nd stage pose lifter model')
     parser.add_argument(
-        '--pose-detector-conifig',
+        '--pose-detector-config',
         type=str,
         default=None,
         help='Config file for the 1st stage 2D pose detector')
@@ -64,7 +64,7 @@ def main():
         type=str,
         default=None,
         help='Json file containing image and bbox inforamtion. Optionally,'
-        'The Jons file can also contain 2D pose information. See'
+        'The Json file can also contain 2D pose information. See'
         '"only-second-stage"')
     parser.add_argument(
         '--camera-param-file',
@@ -264,7 +264,7 @@ def main():
         vis_3d_pose_result(
             pose_lift_model,
             result=pose_lift_results_vis,
-            img=pose_lift_results[0]['image_name'],
+            img=image_name,
             out_file=out_file)
 
 

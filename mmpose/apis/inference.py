@@ -524,6 +524,7 @@ def vis_pose_result(model,
                     radius=4,
                     thickness=1,
                     kpt_score_thr=0.3,
+                    bbox_color='green',
                     dataset='TopDownCocoDataset',
                     show=False,
                     out_file=None):
@@ -744,8 +745,8 @@ def vis_pose_result(model,
                     [14, 18], [7, 11], [11, 15], [15, 19], [7, 12], [12, 16],
                     [16, 20]]
 
-        pose_limb_color = palette[[0] * 20]
-        pose_kpt_color = palette[[0] * 20]
+        pose_kpt_color = palette[[15] * 5 + [0] * 7 + [9] * 8]
+        pose_limb_color = palette[[15] * 5 + [0] * 3 + [0, 9, 9] * 4]
 
     elif dataset in 'MendeleyPLDataset':
         skeleton = [[0, 0], [1, 2], [2, 0]]
@@ -773,6 +774,7 @@ def vis_pose_result(model,
         pose_kpt_color=pose_kpt_color,
         pose_limb_color=pose_limb_color,
         kpt_score_thr=kpt_score_thr,
+        bbox_color=bbox_color,
         show=show,
         out_file=out_file)
 
