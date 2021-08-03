@@ -333,8 +333,14 @@ class MendeleyPLDataset(PowerlineBaseDataset):
             'AR .75', 'AR (M)', 'AR (L)'
         ]
 
+        #calculate dice = 2 * precision * recall / (precision + recall)
+        dice_val= 2.0 * coco_eval.stats[0] * coco_eval.stats [5] / (coco_eval.stats[0] + coco_eval.stats[5])
+        
+        stats_names.append('Dice')
+        coco_eval.stats= np.append(coco_eval.stats,dice_val)
+
         info_str = list(zip(stats_names, coco_eval.stats))
-        print(coco_eval.stats)
+        print(' Dice\t\t\t\t\t\t\t\t\t = '+str(coco_eval.stats[10]))
 
         return info_str
 
