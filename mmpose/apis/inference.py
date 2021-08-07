@@ -762,6 +762,20 @@ def vis_pose_result(model,
         pose_kpt_color = palette[[0] * 3]
         radius = 5
 
+    elif dataset in 'PLDUDataset':
+        pl_palette=np.array([[146, 48, 6], [0, 255, 0], [230, 230, 0],
+                        [0, 0, 255], [255, 51, 255], [10, 250, 250], [255,0,0]
+                        ])
+        skeleton = [[0, 0], [1, 2], [2, 0], [3, 3], [4, 5], [5, 3]]
+
+        pose_limb_color = pl_palette[[
+            6,6,6,6,6,6
+        ]]
+        pose_kpt_color = pl_palette[[
+            0, 1, 2, 3, 4, 5
+        ]]
+        radius = 5
+
     else:
         raise NotImplementedError()
 
