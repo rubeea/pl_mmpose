@@ -268,6 +268,12 @@ def _inference_single_pose_model(model,
     elif dataset in 'MendeleyPLDataset':
     	flip_pairs = []
 
+    elif dataset in 'PLDUDataset':
+        flip_pairs = []
+
+    elif dataset in 'PLDMDataset':
+        flip_pairs = []
+
     else:
         raise NotImplementedError()
 
@@ -773,6 +779,20 @@ def vis_pose_result(model,
         ]]
         pose_kpt_color = pl_palette[[
             0, 1, 2, 3, 4, 5
+        ]]
+        radius = 5
+
+    elif dataset in 'PLDMDataset':
+        pl_palette=np.array([[146, 48, 6], [0, 255, 0], [230, 230, 0],
+                        [0, 0, 255], [255, 51, 255], [10, 250, 250], [255,0,0]
+                        ])
+        skeleton = [[0, 0], [1, 2], [2, 0]]
+
+        pose_limb_color = pl_palette[[
+            6,6,6
+        ]]
+        pose_kpt_color = pl_palette[[
+            0, 1, 2
         ]]
         radius = 5
 
