@@ -26,66 +26,32 @@ log_config = dict(
         dict(type='TensorboardLoggerHook')
     ])
 
-target_type = 'GaussianHeatMap'
 channel_cfg = dict(
-    num_output_channels=3,
-    dataset_joints=3,
+    num_output_channels=6,
+    dataset_joints=6,
     dataset_channel=[
-        [0, 1, 2],
+        [0, 1, 2, 3, 4, 5],
     ],
     inference_channel=[
-        0, 1, 2
+        0, 1, 2, 3, 4, 5
     ])
 
 # model settings
 model = dict(
     type='TopDown',
-    # pretrained='https://download.openmmlab.com/mmpose/'
-    # 'pretrain_models/hrnet_w32-36af842e.pth',
-    backbone=dict(
-        type='HRNet',
-        in_channels=3,
-        extra=dict(
-            stage1=dict(
-                num_modules=1,
-                num_branches=1,
-                block='BOTTLENECK',
-                num_blocks=(4, ),
-                num_channels=(64, )),
-            stage2=dict(
-                num_modules=1,
-                num_branches=2,
-                block='BASIC',
-                num_blocks=(4, 4),
-                num_channels=(32, 64)),
-            stage3=dict(
-                num_modules=4,
-                num_branches=3,
-                block='BASIC',
-                num_blocks=(4, 4, 4),
-                num_channels=(32, 64, 128)),
-            stage4=dict(
-                num_modules=3,
-                num_branches=4,
-                block='BASIC',
-                num_blocks=(4, 4, 4, 4),
-                num_channels=(32, 64, 128, 256))),
-    ),
+    # pretrained='torchvision://resnet50',
+    backbone=dict(type='ResNet', depth=50),
     keypoint_head=dict(
         type='TopdownHeatmapSimpleHead',
-        in_channels=32,
+        in_channels=2048,
         out_channels=channel_cfg['num_output_channels'],
-        num_deconv_layers=0,
-        extra=dict(final_conv_kernel=1, ),
         loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
     train_cfg=dict(),
     test_cfg=dict(
         flip_test=True,
         post_process='default',
-        shift_heatmap=False,
-        target_type=target_type,
-        modulate_kernel=11,
-        use_udp=True))
+        shift_heatmap=True,
+        modulate_kernel=11))
 
 data_cfg = dict(
     image_size=[256, 256],
@@ -108,17 +74,13 @@ train_pipeline = [
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
-    dict(type='TopDownAffine', use_udp=True),
+    dict(type='TopDownAffine'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225]),
-    dict(
-        type='TopDownGenerateTarget',
-        sigma=2,
-        encoding='UDP',
-        target_type=target_type),
+    dict(type='TopDownGenerateTarget', sigma=2),
     dict(
         type='Collect',
         keys=['img', 'target', 'target_weight'],
@@ -130,7 +92,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='TopDownAffine', use_udp=True),
+    dict(type='TopDownAffine'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
@@ -147,27 +109,27 @@ val_pipeline = [
 
 test_pipeline = val_pipeline
 
-data_root = '/content/pl_mmpose/data/pldm'
+data_root = '/content/pl_mmpose/data/pldu'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     val_dataloader=dict(samples_per_gpu=2),
     test_dataloader=dict(samples_per_gpu=2),
     train=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_train.json',
+        type='PLDUDataset',
+        ann_file=f'{data_root}/annotations/pldu_train.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_test.json',
+        type='PLDUDataset',
+        ann_file=f'{data_root}/annotations/pldu_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_test.json',
+        type='PLDUDataset',
+        ann_file=f'{data_root}/annotations/pldu_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
