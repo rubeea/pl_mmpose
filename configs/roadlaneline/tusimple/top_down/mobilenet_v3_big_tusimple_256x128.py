@@ -55,8 +55,8 @@ model = dict(
         modulate_kernel=11))
 
 data_cfg = dict(
-    image_size=[256, 256],
-    heatmap_size=[64, 64],
+    image_size=[256, 128],
+    heatmap_size=[64, 32],
     num_output_channels=channel_cfg['num_output_channels'],
     num_joints=channel_cfg['dataset_joints'],
     dataset_channel=channel_cfg['dataset_channel'],
@@ -110,27 +110,27 @@ val_pipeline = [
 
 test_pipeline = val_pipeline
 
-data_root = '/content/pl_mmpose/data/pldm'
+data_root = '/content/pl_mmpose/data/tusimple'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     val_dataloader=dict(samples_per_gpu=2),
     test_dataloader=dict(samples_per_gpu=2),
     train=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_train.json',
+        type='TuSimpleDataset',
+        ann_file=f'{data_root}/annotations/tusimple_train.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_test.json',
+        type='TuSimpleDataset',
+        ann_file=f'{data_root}/annotations/tusimple_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='PLDMDataset',
-        ann_file=f'{data_root}/annotations/pldm_test.json',
+        type='TuSimpleDataset',
+        ann_file=f'{data_root}/annotations/tusimple_test.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),

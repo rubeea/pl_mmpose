@@ -29,7 +29,7 @@ __all__ = [
     'TopDownPoseTrack18Dataset', 'TopDownJhmdbDataset', 'TopDownMhpDataset',
     'Face300WDataset', 'AnimalHorse10Dataset', 'AnimalMacaqueDataset',
     'AnimalFlyDataset', 'AnimalLocustDataset', 'AnimalZebraDataset',
-    'AnimalPoseDataset', 'MendeleyPLDataset', 'MendeleyBottomUpDataset', 
+    'AnimalPoseDataset', 'MendeleyPLDataset', 'MendeleyBottomUpDataset', 'TuSimpleDataset', 
     'build_dataloader', 'build_dataset', 'Compose',
     'DistributedSampler', 'DATASETS', 'PIPELINES'
 ]
