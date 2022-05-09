@@ -278,15 +278,15 @@ class TopDown(BasePose):
             if 'label' in result[0]:
                 labels = [res['label'] for res in result]
             # draw bounding boxes
-            imshow_bboxes(
-                img,
-                bboxes,
-                labels=labels,
-                colors=bbox_color,
-                text_color=text_color,
-                thickness=bbox_thickness,
-                font_scale=font_scale,
-                show=False)
+            # imshow_bboxes(
+            #     img,
+            #     bboxes,
+            #     labels=labels,
+            #     colors=bbox_color,
+            #     text_color=text_color,
+            #     thickness=bbox_thickness,
+            #     font_scale=font_scale,
+            #     show=False)
 
             imshow_keypoints(img, pose_result, skeleton, kpt_score_thr,
                              pose_kpt_color, pose_limb_color, radius,
