@@ -111,6 +111,10 @@ def imshow_keypoints(img,
     img = mmcv.imread(img)
     img_h, img_w, _ = img.shape
 
+    #for instance pose of different lane lines
+    pl_palette=np.array([[0,255,255],[255,255,0],[255,0,255],[2,252,3]])
+    cc=0
+
     for kpts in pose_result:
         # draw each point on image
         if pose_kpt_color is not None:
@@ -138,6 +142,10 @@ def imshow_keypoints(img,
 
         # draw limbs
         if skeleton is not None and pose_limb_color is not None:
+            
+            #different pose color for eah road lane line
+            pose_limb_color= pl_palette[[cc] * 3]
+
             assert len(pose_limb_color) == len(skeleton)
             for sk_id, sk in enumerate(skeleton):
                 pos1 = (int(kpts[sk[0] - 1, 0]), int(kpts[sk[0] - 1, 1]))
@@ -182,7 +190,7 @@ def imshow_keypoints(img,
                             pos1,
                             pos2, (int(r), int(g), int(b)),
                             thickness=thickness)
-
+            cc= cc +1               
     return img
 
 
