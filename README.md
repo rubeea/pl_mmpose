@@ -19,13 +19,13 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 # Schematic Diagram and Framework Architecture
 
-> *Schematic Diagram of the proposed PLPose framework.*
+> *Schematic Diagram of proposed PLPose for processing and detecting PLs via key points-based pose estimation. The main modules are highlighted in green color.*
 
 <p align="center">
   <img src="images/PLPose_Schematic_Diagram_Fig1.webp" width="900" alt="PLPose Framework Architecture">
 </p>
 
-> *Architecture of the proposed PLPose framework.*
+> *Architecture of the proposed PLPose framework: The proposed kMobileNetV3 (MobileNetV3 + Simple Key Point Head) Network for PL detection via top-down pose estimation. MobileNetV3 small or large version can be used as the backbone in the network. In this image, MobileNetV3-Small constitutes the backbone for extracting the feature maps (8x8x96) from the image via downsampling while the simple key point head uses three dconv layers to generate the high resolution key point heatmaps (64x64xk) via upsampling process, where k is the number of key points. It should be noted that k = 3 (start, center, and end) for PL detection in this study. PL start, center and end are detected via red, green and cyan key points and the PL is detected as the pose with a yellow line along with a white bbox.*
 
 <p align="center">
   <img src="images/PLPose_architecture_Fig7.webp" width="900" alt="PLPose Framework Architecture">
@@ -77,7 +77,7 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 - Python
 - PyTorch
-- MMPose Framework [Clickable Text](Available at: https://github.com/open-mmlab/mmpose)
+- MMPose Framework (Available at: https://github.com/open-mmlab/mmpose)
 - MobileNetV3
 - Keypoints-Based Pose Estimation
 - Unbiased Data Processing (UDP)
