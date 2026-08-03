@@ -22,7 +22,7 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 > *Schematic Diagram of the proposed PLPose framework.*
 
 <p align="center">
-  <img src="images/plpose_schematicdiagram.png" width="900" alt="PLPose Framework Architecture">
+  <img src="images/PLPose_Schematic_Diagram_Fig1.webp" width="900" alt="PLPose Framework Architecture">
 </p>
 
 > *Architecture of the proposed PLPose framework.*
@@ -40,7 +40,7 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 > *Results on some sample images from PLD dataset (From left to right: original image, proposed kMobileNetV3-Large + UDP model with the three key points: S (green), C (purple), E (red), modified PINet model (Sumagayan et al., 2021), CNNCDM, BDCN, CFSC, RCF, HED, Gestalt Grouping and Canny). Our model can detect the power lines using the connections between three key points only. The connections between the key points are estimated directly as pose of the PL from our proposed model.*
 
 <p align="center">
-  <img src="images/results.png" width="900" alt="Power Line Detection Results">
+  <img src="images/PLPose_qual_results_Fig13.webp" width="900" alt="Power Line Detection Results">
 </p>
 
 ---
