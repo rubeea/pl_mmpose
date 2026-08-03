@@ -47,28 +47,28 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 ### Benchmark Performance
 
-> *_Table 9 Experimental Results of various top-down pose estimation networks (HRNet-w32, HRNet-w32 + UDP, Resnet-50 Simple Baseline, and Proposed Approach (kMobileNetV3 and kMobileNetV3 + UDP)) on Mendeley PL Test Set (k = 3) with 40 Images._ *
+> _Table 9 Experimental Results of various top-down pose estimation networks (HRNet-w32, HRNet-w32 + UDP, Resnet-50 Simple Baseline, and Proposed Approach (kMobileNetV3 and kMobileNetV3 + UDP)) on Mendeley PL Test Set (k = 3) with 40 Images._ 
 
 <p align="center">
-  <img src="images/PLPose_mendeleyresult_Table9.png" width="900" alt="Power Line Detection Results">
+  <img src="images/PLPose_mendeleyresult_Table9.PNG"alt="Power Line Detection Results">
 </p>
 
 > *_Table 10 Experimental Results of various top-down pose estimation networks (HRNet-w32, HRNet-w32 + UDP, Resnet-50 Simple Baseline, and Proposed Approach (kMobileNetV3 and kMobileNetV3 + UDP)) on PLD Test Set (k = 3) with 170 Images_.*
 > 
 <p align="center">
-  <img src="images/PLPose_PLDresult_Table10.png" width="900" alt="Power Line Detection Results">
+  <img src="images/PLPose_PLDresult_Table10.PNG" alt="Power Line Detection Results">
 </p>
 
 > *_Table 11 Performance in average precision (AP) of Various Key Point Detectors on PLD Test Set with 170 Images._*
 > 
 <p align="center">
-  <img src="images/PLPose_PLDresult_Table11.png" width="900" alt="Power Line Detection Results">
+  <img src="images/PLPose_PLDresult_Table11.PNG" alt="Power Line Detection Results">
 </p>
 
 > *_Table 12 Processing Time in FPS of Various Key Point Detectors on PLD Test Set with 170 Images._*
 > 
 <p align="center">
-  <img src="images/PLPose_PLDresult_Table12.png" width="900" alt="Power Line Detection Results">
+  <img src="images/PLPose_PLDresult_Table12.PNG"  alt="Power Line Detection Results">
 </p>
 
 ---
