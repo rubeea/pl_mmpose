@@ -28,7 +28,7 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 > *Architecture of the proposed PLPose framework.*
 
 <p align="center">
-  <img src="images/plpose_architecture.png" width="900" alt="PLPose Framework Architecture">
+  <img src="images/PLPose_architecture_Fig7.webp" width="900" alt="PLPose Framework Architecture">
 </p>
 
 ---
@@ -37,7 +37,7 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 ### Qualitative Results
 
-> *Results on some sample images from PLD dataset (From left to right: original image, proposed kMobileNetV3-Large + UDP model with the three key points: S (green), C (purple), E (red), modified PINet model (Sumagayan et al., 2021), CNNCDM, BDCN, CFSC, RCF, HED, Gestalt Grouping and Canny). Our model can detect the power lines using the connections between three key points only. The connections between the key points are estimated directly as pose of the PL from our proposed model.*
+> *Results on some sample images from PLD (PLDU + PLDM) dataset (From left to right: original image, proposed kMobileNetV3-Large + UDP model with the three key points: S (green), C (purple), E (red), modified PINet model (Sumagayan et al., 2021), CNNCDM, BDCN, CFSC, RCF, HED, Gestalt Grouping and Canny). Our model can detect the power lines using the connections between three key points only. The connections between the key points are estimated directly as pose of the PL from our proposed model.*
 
 <p align="center">
   <img src="images/PLPose_qual_results_Fig13.webp" width="900" alt="Power Line Detection Results">
@@ -47,7 +47,29 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 ### Benchmark Performance
 
+> *_Table 9 Experimental Results of various top-down pose estimation networks (HRNet-w32, HRNet-w32 + UDP, Resnet-50 Simple Baseline, and Proposed Approach (kMobileNetV3 and kMobileNetV3 + UDP)) on Mendeley PL Test Set (k = 3) with 40 Images._ *
 
+<p align="center">
+  <img src="images/PLPose_mendeleyresult_Table9.png" width="900" alt="Power Line Detection Results">
+</p>
+
+> *_Table 10 Experimental Results of various top-down pose estimation networks (HRNet-w32, HRNet-w32 + UDP, Resnet-50 Simple Baseline, and Proposed Approach (kMobileNetV3 and kMobileNetV3 + UDP)) on PLD Test Set (k = 3) with 170 Images_.*
+> 
+<p align="center">
+  <img src="images/PLPose_PLDresult_Table10.png" width="900" alt="Power Line Detection Results">
+</p>
+
+> *_Table 11 Performance in average precision (AP) of Various Key Point Detectors on PLD Test Set with 170 Images._*
+> 
+<p align="center">
+  <img src="images/PLPose_PLDresult_Table11.png" width="900" alt="Power Line Detection Results">
+</p>
+
+> *_Table 12 Processing Time in FPS of Various Key Point Detectors on PLD Test Set with 170 Images._*
+> 
+<p align="center">
+  <img src="images/PLPose_PLDresult_Table12.png" width="900" alt="Power Line Detection Results">
+</p>
 
 ---
 
@@ -55,11 +77,10 @@ To further improve localization accuracy, the framework integrates **Unbiased Da
 
 - Python
 - PyTorch
-- MMPose
+- MMPose Framework [Clickable Text](Available at: https://github.com/open-mmlab/mmpose)
 - MobileNetV3
 - Keypoints-Based Pose Estimation
 - Unbiased Data Processing (UDP)
-- OpenCV
 - Computer Vision
 - Deep Learning
 - UAV Image Analysis
